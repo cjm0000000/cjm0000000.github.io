@@ -5,15 +5,7 @@
 
 	<div class="col-sm-10">
         <span class="post-date">
-            {% assign d = page.date | date: "%d" | plus:'0' %}
-            {{ page.date | date: "%B" }}
-            {% case d %}
-             {% when 1 or 21 or 31 %}{{ d }}st,
-             {% when 2 or 22 %}{{ d }}nd,
-             {% when 3 or 23 %}{{ d }}rd,
-             {% else %}{{ d }}th,
-            {% endcase %}
-            {{ page.date | date: "%Y" }}
+            <span class="glyphicon glyphicon-calendar"></span> {{ page.date | date: "%Y年%m月%d日" }}
         </span>
 
         <div class="article_body">
@@ -73,14 +65,14 @@
 
         <ul class="pager">
           {% if page.previous %}
-          <li class="previous"><a href="{{ BASE_PATH }}{{ page.previous.url }}" title="{{ page.previous.title }}">&larr; Previous</a></li>
+          <li class="previous"><a href="{{ BASE_PATH }}{{ page.previous.url }}" title="{{ page.previous.title }}">&larr; 上一篇</a></li>
           {% else %}
-          <li class="previous disabled"><a>&larr; Previous</a></li>
+          <li class="previous disabled"><a>&larr; 上一篇</a></li>
           {% endif %}
           {% if page.next %}
-          <li class="next"><a href="{{ BASE_PATH }}{{ page.next.url }}" title="{{ page.next.title }}">Next &rarr;</a></li>
+          <li class="next"><a href="{{ BASE_PATH }}{{ page.next.url }}" title="{{ page.next.title }}">下一篇 &rarr;</a></li>
           {% else %}
-            <li class="next disabled"><a>Next &rarr;</a>
+            <li class="next disabled"><a>下一篇 &rarr;</a>
           {% endif %}
         </ul>
 

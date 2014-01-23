@@ -1,7 +1,9 @@
 @import url(http://fonts.googleapis.com/css?family=Ubuntu:500&subset=latin,latin-ext);
 
-body{
-	color: #2c3e50;
+body {
+	padding-top: 40px;
+	padding-bottom: 40px;
+	background-color: #eee;
 }
 
 .sidebar {
