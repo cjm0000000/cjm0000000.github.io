@@ -5,7 +5,9 @@
 
 	<div class="col-sm-10">
         <span class="post-date">
-            <span class="glyphicon glyphicon-calendar"></span> {{ page.date | date: "%Y年%m月%d日" }}
+            <span class="label label-default"><span class="glyphicon glyphicon-calendar"></span> {{ page.date | date: "%Y年%m月%d日" }}</span>
+			<span class="label label-info"><span class="glyphicon glyphicon-tags"></span> {{ page.tags }}</span>  
+   <span class="label label-primary"><span class="glyphicon glyphicon-folder-open"></span> {{ page.categories }}</span>   
         </span>
 
         <div class="article_body">

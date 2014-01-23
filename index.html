@@ -1,0 +1,21 @@
+---
+layout: page
+title: Lemon's Blog
+tagline:  
+---
+{% include JB/setup %}
+
+{% for post in site.posts %}
+<div class="row" style="font-size: 15px;line-height: 1.7;color: #666;">
+<div class="col-md-12">
+<h2><a href="{{ BASE_PATH }}{{ post.url }}">{{ post.title }}</a></h2>
+<p><span class="label label-default"><span class="glyphicon glyphicon-calendar"></span> {{ post.date | date: "%Y年%m月%d日" }}</span>  
+   <span class="label label-info"><span class="glyphicon glyphicon-tags"></span> {{ post.tags }}</span>  
+   <span class="label label-primary"><span class="glyphicon glyphicon-folder-open"></span> {{ post.categories }}</span>  
+</p>
+<p>{{ post.content | strip_html | truncate : 300 | prepend : "&nbsp;&nbsp;&nbsp;&nbsp;" }}</p>  
+
+<p><a class="btn btn-default" href="{{ BASE_PATH }}{{ post.url }}" role="button">阅读全文 &raquo;</a></p>
+</div>
+</div>
+{% endfor %}
