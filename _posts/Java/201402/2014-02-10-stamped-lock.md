@@ -102,72 +102,23 @@ __使用示例。__ 下面举例说明在维护一个简单的二维类（Point�
 
 ### 内部实现
 
+---
+
 #### 算法笔记
 
 该设计采用了元素的顺序锁（用于linux内核；见[Lameter's](http://www.lameter.com/gelato2005.pdf)以及其他；见[Boehm's](http://www.hpl.hp.com/techreports/2012/HPL-2012-68.html)）以及有序的读写锁（见[Shirako](http://dl.acm.org/citation.cfm?id=2312015)）  
 
 从概念上讲，锁的主状态包括一个序列号，是奇数时，写锁定，偶数相反。然而这是一个读锁锁定时的非零读计数器值的偏移量。当验证乐观读锁的标志（stamp）时，读计数器被忽略。由于我们必须给读线程使用一个有限数量的位（JDK 7），当读线程的数量超过了计数字段时，会使用一个补充的读线程溢出单词。为此，我们处理最大读线程的值（RBITS）作为自旋锁保护更新溢出。
  
-写线程采用一个在`AbstractQueuedSynchronizer`中使用的`CLH`锁的改进形式（在它内部文档查看详情），每个节点被标记（字段模式）为不是读线程就是写线程。等待的写线程集合被分组（链接的形式）分配在一个通用的节点下（字段`cowait`）因此作为一个关于大多数`CLH`技术的单独节点。凭借队列结构的优点，等待节点无需携带序列号；我们知道每个节点都比他前节点高。这种简化了调度策略的FIFO模式，包含`Phase-Fair`锁的元素（见 Brandenburg & Anderson, 特别是http://www.cs.unc.edu/~bbb/diss/）。特别是，我们使用`phase-fair` `anti-barging`规则，当读锁被保持但是存在一个等待的写线程时，如果一个读线程到达，这个读线程需要排队。
+写线程采用一个在`AbstractQueuedSynchronizer`中使用的`CLH`锁的改进形式（在它内部文档查看详情），每个节点被标记（字段模式）为不是读线程就是写线程。等待的写线程集合被分组（链接的形式）分配在一个通用的节点下（字段`cowait`）因此作为一个关于大多数`CLH`技术的单独节点。凭借队列结构的优点，等待节点无需携带序列号；我们知道每个节点都比他前节点高。这种简化了调度策略的FIFO模式，包含`Phase-Fair`锁的元素（见 Brandenburg & Anderson, 特别是http://www.cs.unc.edu/~bbb/diss/）。特别是，我们使用`phase-fair` `anti-barging`规则，当读锁被保持但是存在一个等待的写线程时，如果一个读线程到达，这个读线程需要排队。（这个规则对于一些方法的复杂读获取`acquireRead`是可靠的，但是没有它，锁会变得非常不公平。）方法释放本身不会（有时不能）让读线程们`cowaiters`醒来。这是通过主线程做的，因为其他线程无法让方法`acquireRead`和`acquireWrite`做的更好。
+
+这些规则适用于线程排队。所有`tryLock`形式的方法投机地尝试获取锁而不管偏好规则，所以可能“闯入”（*barge*）他们的入口。在获取（`acquire`）方法采用随机自旋的方式减少（越来越贵）上线文切换，同时也避免多个线程之间的持续内存颠簸。我们限制在队列头部自旋。一个线程在阻塞之前自旋的次数由`SPINS`次数（其中每个迭代有50%的概率减小自旋计数器）决定。如果它醒来以后未能获得锁，并且仍然是（或成为）第一个等待线程（这表明某个其他线程闯入并且获得锁），它升级自旋次数（直到`MAX_HEAD_SPINS`）以减少驳运线程不断失败的可能性。
+
+几乎所有这些机制都在方法`acquireWrite`和`acquireRead`实现了，作为典型的代码扩展，因为动作（actions）和重试（retries）依赖于一致的本地缓存读取。
+
+正如Boehm的[论文](http://www.hpl.hp.com/techreports/2012/HPL-2012-68.html)，序列验证（主要方法`validate()`）相比常规的`volatile`读（`state`变量）要求更严格的排序规则。我们使用`Unsafe.loadFence`方法强制读线程在`validation`方法以及`validation`方法本身还没有强制排序的情况下排序。
+
+内存设计保持锁定状态和队列指针在一起（通常在同一缓存行）。这通常可以很好地用于读为主的负载。在大多数其他情况，自适应自旋锁（`adaptive-spin`）CLH的自然倾向是为了减少内存争用，减少更进一步展开竞争位置的积极性，但是可能是属于未来的改进。
  
  
- 
- 
-
-     *
-     * Waiters use a modified form of CLH lock used in
-     * AbstractQueuedSynchronizer (see its internal documentation for
-     * a fuller account), where each node is tagged (field mode) as
-     * either a reader or writer. Sets of waiting readers are grouped
-     * (linked) under a common node (field cowait) so act as a single
-     * node with respect to most CLH mechanics.  By virtue of the
-     * queue structure, wait nodes need not actually carry sequence
-     * numbers; we know each is greater than its predecessor.  This
-     * simplifies the scheduling policy to a mainly-FIFO scheme that
-     * incorporates elements of Phase-Fair locks (see Brandenburg &
-     * Anderson, especially http://www.cs.unc.edu/~bbb/diss/).  In
-     * particular, we use the phase-fair anti-barging rule: If an
-     * incoming reader arrives while read lock is held but there is a
-     * queued writer, this incoming reader is queued.  (This rule is
-     * responsible for some of the complexity of method acquireRead,
-     * but without it, the lock becomes highly unfair.) Method release
-     * does not (and sometimes cannot) itself wake up cowaiters. This
-     * is done by the primary thread, but helped by any other threads
-     * with nothing better to do in methods acquireRead and
-     * acquireWrite.
-     *
-     * These rules apply to threads actually queued. All tryLock forms
-     * opportunistically try to acquire locks regardless of preference
-     * rules, and so may "barge" their way in.  Randomized spinning is
-     * used in the acquire methods to reduce (increasingly expensive)
-     * context switching while also avoiding sustained memory
-     * thrashing among many threads.  We limit spins to the head of
-     * queue. A thread spin-waits up to SPINS times (where each
-     * iteration decreases spin count with 50% probability) before
-     * blocking. If, upon wakening it fails to obtain lock, and is
-     * still (or becomes) the first waiting thread (which indicates
-     * that some other thread barged and obtained lock), it escalates
-     * spins (up to MAX_HEAD_SPINS) to reduce the likelihood of
-     * continually losing to barging threads.
-     *
-     * Nearly all of these mechanics are carried out in methods
-     * acquireWrite and acquireRead, that, as typical of such code,
-     * sprawl out because actions and retries rely on consistent sets
-     * of locally cached reads.
-     *
-     * As noted in Boehm's paper (above), sequence validation (mainly
-     * method validate()) requires stricter ordering rules than apply
-     * to normal volatile reads (of "state").  To force orderings of
-     * reads before a validation and the validation itself in those
-     * cases where this is not already forced, we use
-     * Unsafe.loadFence.
-     *
-     * The memory layout keeps lock state and queue pointers together
-     * (normally on the same cache line). This usually works well for
-     * read-mostly loads. In most other cases, the natural tendency of
-     * adaptive-spin CLH locks to reduce memory contention lessens
-     * motivation to further spread out contended locations, but might
-     * be subject to future improvements.
-
-
-
+-未完待续
