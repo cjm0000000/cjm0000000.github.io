@@ -3,7 +3,9 @@
 body {
 	padding-top: 40px;
 	padding-bottom: 40px;
-	background-color: #eee;
+    background: url(../images/bg.png) repeat;
+    font-size: 16px;
+    font-weight:400;
 }
 
 .sidebar {
@@ -56,16 +58,11 @@ article{
 	margin-bottom: 20px;
 	font-size: 15px;
 	line-height: 1.7;
-	color: #666;
 }
 
 .post-date {
-	text-transform: uppercase;
 	font-size: 14px;
 }
-
-article.home div a, article.home pre a { color: #2c3e50; }
-article.home div a:hover, article.home pre a:hover { color: #2c3e50; text-decoration: none; }
 
 h1,h2,h3,h4,h5,h6{ font-family: 'Ubuntu', sans-serif; color: #8a6d3b; }
 h1 a,h2 a,h3 a,h4 a{ color: #f2756a; }
