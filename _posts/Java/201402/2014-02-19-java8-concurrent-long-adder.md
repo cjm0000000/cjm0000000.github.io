@@ -15,8 +15,8 @@ tags: [concurrent]
 
 一个或多个变量，它们共同维持一个初始为零类型为`long`的总和。当跨线程竞争更新（`add(long)`方法）时，该组变量可以动态地扩展，以减少争用。`sum()`方法（或者等价的`longValue()`方法）返回当前整组变量保持的总和。
 
-This class is usually preferable to AtomicLong when multiple threads update a common sum that is used for purposes such as collecting statistics, not for fine-grained synchronization control. Under low update contention, the two classes have similar characteristics. But under high contention, expected throughput of this class is significantly higher, at the expense of higher space consumption.
+当多线程更新一个用于通用的求和，例如收集统计信息，而不是细粒度的同步控制，这个类通常比`AtomicLong`类表现更好。在低争用下更新，这两个类具有相似的特性。但是在高并发下，这个类的预期吞吐量会显著提高，它以更高的空间消耗为代价。
 
-LongAdders can be used with a ConcurrentHashMap to maintain a scalable frequency map (a form of histogram or multiset). For example, to add a count to a `ConcurrentHashMap<String,LongAdder>` freqs, initializing if not already present, you can use `freqs.computeIfAbsent(k -> new LongAdder()).increment();`
+`LongAdders`可以与`ConcurrentHashMap`一起使用，维护一个可频繁扩展的`map`（`histogram`或` multiset`的形式）。例如，为`ConcurrentHashMap<String,LongAdder> freqs`增加一个计数器，如果不存在则初始化，你可以使用代码`freqs.computeIfAbsent(k -> new LongAdder()).increment();`。
 
-This class extends Number, but does not define methods such as equals, hashCode and compareTo because instances are expected to be mutated, and so are not useful as collection keys.
+这个类继承于`Number`类，但是并没有定义例如`equals`，`hashCode`和`compareTo`之类的方法，因为实例预期将会突变，所以他们作为集合的键是没有用的。
