@@ -6,7 +6,7 @@ category: Java8
 tags: [concurrent]
 ---
 {% include JB/setup %}
-
+<?prettify?>
     public class StampedLock implements java.io.Serializable
 
 [Java Doc 地址] (http://cr.openjdk.java.net/~chegar/8005697/ver.00/javadoc/StampedLock.html)
@@ -31,6 +31,7 @@ tags: [concurrent]
 
 __使用示例。__ 下面举例说明在维护一个简单的二维类（Point）中的一些使用习惯。示例代码演示了一些`try/catch`约定，即使他们不是必须的因为没有异常会在他们里面发生。
 
+<?prettify linenums=1?>
     class Point {
        private double x, y;
        private final StampedLock sl = new StampedLock();

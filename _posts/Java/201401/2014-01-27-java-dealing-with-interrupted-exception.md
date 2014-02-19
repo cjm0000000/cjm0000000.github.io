@@ -30,6 +30,7 @@ __本文译自[Java theory and practice: Dealing with InterruptedException](http
 如果抛出`InterruptedException`异常意味着这是一个阻塞方法，那么调用一个阻塞方法意味着你的方法也是一个阻塞方法，并且你需要一种策略处理`InterruptedException`异常。通常最简单的一种策略是自己把`InterruptedException`异常抛出去，如 [清单1](#code1)中的方法`putTask()`和`getTask()`所示。这样做让你的方法响应中断，只不过通常需要添加`InterruptedException`异常到你的`throws`子句。
 
 #### <span id="code1">清单1</span>. 传递`InterruptedException`给调用者  
+<?prettify linenums=1?>
     public class TaskQueue {
         private static final int MAX_TASKS = 1000;
 
@@ -48,6 +49,7 @@ __本文译自[Java theory and practice: Dealing with InterruptedException](http
 有时候需要在异常传播之前做一些清理工作。在这种情况下，你可以捕获`InterruptedException`异常，执行清理，然后重新抛出异常。[清单2](#code2)，一个匹配在线游戏服务中玩家的机制，阐明了这种技术。`matchPlayers()`将等待两名玩家到达，然后开始一个新的游戏。如果线程在一个玩家到达后但是另外一个玩家还没到达的时候被中断，它在重新抛出`InterruptedException`异常之前把玩家放回队列，这样玩家的游戏请求就不会丢失。
 	
 #### <span id="code2">清单2</span>. 在重新抛出`InterruptedException`异常之前执行特定任务  
+<?prettify linenums=1?>
     public class PlayerMatcher {
         private PlayerSource players;
 
@@ -81,6 +83,7 @@ __本文译自[Java theory and practice: Dealing with InterruptedException](http
 有时抛出`InterruptedException`异常不是一个选择，比如当一个`Runnable`定义的任务调用一个可中断的方法。在这种情况下，你不能重新抛出`InterruptedException`异常，但是你也不想什么都不做。当一个阻塞方法发现中断并且抛出`InterruptedException`异常，它清除了中断状态。如果你捕获了`InterruptedException`异常但是无法重新抛出，你应该保存中断发生的证据以便上层代码在调用堆栈可以获悉中断并且在它想要应对的时候应对它。这个任务是通过调用`interrupt()`来重新中断当前线程，如[清单3](#code3)所示。至少，无论何时你捕获了`InterruptedException`异常，不要重新抛出它，在返回之前重新中断当前线程。
 
 #### <span id="code3">清单3</span>. 在捕获`InterruptedException`异常后恢复中断状态  
+<?prettify linenums=1?>
     public class TaskRunner implements Runnable {
         private BlockingQueue<Task> queue;
 
@@ -105,6 +108,7 @@ __本文译自[Java theory and practice: Dealing with InterruptedException](http
 处理`InterruptedException`异常最糟糕的方式是你可以吞咽它 -- 捕获它并且既不重新抛出也不重申线程的中断状态。标准的方式处理异常你没有计划 -- 捕获它并且记录它 -- 也算是吞咽中断，因为上层代码在调用堆栈将不能了解它。（记录`InterruptedException`异常也仅仅是愚蠢的，因为当人去阅读这个记录的时候，对它做任何事都太晚了）[清单4](#code4) 显示了通常吞下一个中断模式：  
 
 #### <span id="code4">清单4</span>. 吞下一个中断 -- 不要这样做  
+<?prettify linenums=1?>
     // Don't do this 
     public class TaskRunner implements Runnable {
         private BlockingQueue<Task> queue;
@@ -135,6 +139,7 @@ __本文译自[Java theory and practice: Dealing with InterruptedException](http
 一次可以接受生吞中断的情况是你知道线程即将退出。这种情况只发生在类调用可中断的方法是线程的一部分，而不是`Runnable`或通用库代码，如[清单5](#code5)所示。它会创建一个线程，该线程列举素数，直到它被中断，并且允许线程在被中断时退出。在两个地方用于循环检测中断：一处是在`while`循环的开头循环检测`isInterrupted()`方法，另一处是在调用阻塞方法`BlockingQueue.put()`的时候。
 
 #### <span id="code5">清单5</span>. 中断可以吞下如果你知道线程即将退出  
+<?prettify linenums=1?>
     public class PrimeProducer extends Thread {
         private final BlockingQueue<BigInteger> queue;
 
@@ -163,7 +168,8 @@ __本文译自[Java theory and practice: Dealing with InterruptedException](http
 
 一些任务简单拒绝被中断，使他们不可被取消。然而，即使是不可被取消的任务应该试图保留中断状态，万一调用堆栈的上层代码想要在无阻塞任务结束后对中断进行处理。[清单6](#code6)显示了一个方法等待一个阻塞队列直到它可用，不管它是否被中断。作为一个好公民，它在完成后，在`finally`块中恢复了线程的中断状态，为的是不剥夺中断调用者的请求。（它不能提早恢复中断状态，因为它会导致无线循环 -- `BlockingQueue.take()`会在进入方法的时候立即轮询中断状态并且抛出`InterruptedException`异常，如果它发现中断状态被设置。）
 
-#### <span id="code6">清单6</span>. Noncancelable task that restores interrupted status before returning
+#### <span id="code6">清单6</span>. 无法取消的任务在返回前重新恢复中断状态
+<?prettify linenums=1?>
     public Task getNextTask(BlockingQueue<Task> queue) {
         boolean interrupted = false;
         try {

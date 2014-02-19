@@ -6,7 +6,7 @@ category: Java
 tags: [concurrent]
 ---
 {% include JB/setup %}
-
+<?prettify?>
     public class ReentrantReadWriteLock extends Object implements ReadWriteLock, Serializable
 
 [Java Doc 地址] (http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/ReentrantReadWriteLock.html)
@@ -58,7 +58,7 @@ tags: [concurrent]
 此类行为同样以内置锁的方式序列化：反序列化的锁处于解锁状态，不管序列化的时候是什么状态。
 
 __示例用法.__ 这里有一个代码草图演示如何在更新一个缓存后执行锁降级（当非嵌套方式处理多个锁的时候异常处理尤其棘手）：
-
+<?prettify linenums=1?>
 	class CachedData {
 	   Object data;
 	   volatile boolean cacheValid;
@@ -94,7 +94,7 @@ __示例用法.__ 这里有一个代码草图演示如何在更新一个缓存�
 	 
 
 `ReentrantReadWriteLocks`在某些类型的集合中可以用来提高并发。当集合容量预期很大，读线程多于写线程并且操作（*笔者认为是线程临界区里的逻辑运算*）需要的开销超过同步开销，这通常是值得做的。例如，这是一个将大并发访问大容量`TreeMap`的类。
-
+<?prettify linenums=1?>
     class RWDictionary {
 	    private final Map<String, Data> m = new TreeMap<String, Data>();
 	    private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
@@ -141,7 +141,7 @@ __ReentrantReadWriteLock中的AQS__
   - __写锁__
 
   写锁的操作相对简单，`ReentrantReadWriteLock`中的AQS主要实现了这几个方法：
-      
+<?prettify linenums=1?>
       // 尝试获取写锁
       boolean tryAcquire(int acquires);
       // 尝试释放写锁
@@ -150,7 +150,7 @@ __ReentrantReadWriteLock中的AQS__
       boolean isHeldExclusively();
       
   下面开始分析`tryAcquire`源码：
-  
+<?prettify linenums=1?>
       protected final boolean tryAcquire(int acquires) {
             /*
              * Walkthrough:
@@ -194,7 +194,7 @@ __ReentrantReadWriteLock中的AQS__
  成功获取锁则返回`true`，失败有两种情况：普通失败返回`false`，计数器饱和直接抛出`java.lang.Error`。
   
  下面是`tryRelease`的源码：
-  
+<?prettify linenums=1?>
         /*
          * Note that tryRelease and tryAcquire can be called by
          * Conditions. So it is possible that their arguments contain
@@ -216,7 +216,7 @@ __ReentrantReadWriteLock中的AQS__
   这个方法用于释放写锁，需要知道的是`tryRelease`和`tryAcquire`可以通过条件调用。所以在某个条件等待的时候他们的包含读和写计数值的参数被全部释放并且在`tryAcquire`的时候重新建立。
   
   `isHeldExclusively`的原理很简单：
-  
+<?prettify linenums=1?>
         protected final boolean isHeldExclusively() {
             // While we must in general read state before owner, 我们需要在设置写锁所有者之前读取状态
             // we don't need to do so to check if current thread is owner  我们不需要检测当前状态是否是写锁所有者
@@ -224,7 +224,7 @@ __ReentrantReadWriteLock中的AQS__
         }
         
   写锁还需要提供几个额外的API：
-  
+<?prettify linenums=1?>
       boolean tryWriteLock();// 和`tryAcquire`逻辑一致，除了一点：它不调用`writerShouldBlock()`
       
       ConditionObject newCondition();// 新建一个条件
@@ -241,14 +241,14 @@ __ReentrantReadWriteLock中的AQS__
   - __读锁__
 
  读锁的实现相对复杂一些，`ReentrantReadWriteLock`中的AQS读锁相关的方法如下：  
- 
+<?prettify linenums=1?>
         // 尝试加读锁  
         int tryAcquireShared(int unused);  
         // 尝试释放读锁  
         boolean tryReleaseShared(int unused);
         
  此外还有一些辅助的变量和方法：  
- 
+<?prettify linenums=1?>
          int sharedCount(int c);
          
          private transient ThreadLocalHoldCounter readHolds;
@@ -265,7 +265,7 @@ __ReentrantReadWriteLock中的AQS__
      
 
  下面详细分析这些字段和方法：
-
+<?prettify linenums=1?>
         /**
          * A counter for per-thread read hold counts.
          * Maintained as a ThreadLocal; cached in cachedHoldCounter
@@ -277,7 +277,7 @@ __ReentrantReadWriteLock中的AQS__
         }
         
  `HoldCounter`为每个线程保存读计数器，缓存在变量`cachedHoldCounter`中，作为`ThreadLocal`维护。
-
+<?prettify linenums=1?>
         /**
          * ThreadLocal subclass. Easiest to explicitly define for sake
          * of deserialization mechanics.
@@ -290,7 +290,7 @@ __ReentrantReadWriteLock中的AQS__
         }
         
  `ThreadLocalHoldCounter`是一个`ThreadLocal`的子类，它里面保存的对象是`HoldCounter`，从代码中可以看出它会为一个新的线程创建一个新的`HoldCounter`.
-        
+<?prettify linenums=1?>
         /**
          * The hold count of the last thread to successfully acquire
          * readLock. This saves ThreadLocal lookup in the common case
@@ -310,8 +310,7 @@ __ReentrantReadWriteLock中的AQS__
  再来看看变量`cachedHoldCounter`的注释：  
  最后一个成功持有读锁的线程的计数器。这样做可以节省在通常情况下`ThreadLocal`的查找，其中的下一个线程的释放是最后一个获取的。这是非易失性的因为这只是用作启发式，线程缓存他们很好。被保存的线程读计数器可以活的比线程长，但是通过不保持它到线程的引用来避免垃圾滞留。  
 通过一个良性数据争用存取；依赖于内存模型的常量字段和最低限度的安全性保证。
-
-
+<?prettify linenums=1?>
         /**
          * The number of reentrant read locks held by current thread.
          * Initialized only in constructor and readObject.
@@ -320,7 +319,7 @@ __ReentrantReadWriteLock中的AQS__
         private transient ThreadLocalHoldCounter readHolds;
 
  `readHolds`是指当前线程保持的读计数器。只在构造器和`readObject`方法中初始化。每当一个线程的读计数器下降到0，移除当前线程`readHolds`的值。
-
+<?prettify linenums=1?>
         /**
          * firstReader is the first thread to have acquired the read lock.
          * firstReaderHoldCount is firstReader's hold count.
@@ -347,7 +346,7 @@ __ReentrantReadWriteLock中的AQS__
  因为`tryReleaseShared`方法会把它设置为空,所以无法造成垃圾滞留除非线程线程终止而没有放弃它的读锁。  
 通过一个良性数据争用存取；依赖于内存模型的最低限度的安全性保证引用。  
 这种允许跟踪读计数器的方式对无竞争的读锁来说是非常便宜的。
-
+<?prettify linenums=1?>
         protected final int tryAcquireShared(int unused) {
             /*
              * Walkthrough:
@@ -396,8 +395,8 @@ __ReentrantReadWriteLock中的AQS__
 2. 否则，这个线程符合锁的状态，由于排队策略，所以需要询问是否应该阻塞。如果不阻塞，尝试通CAS更改状态和更新计数器值取得授权。注意那个步骤没有检测重入获取，这会推迟到`fullTryAcquireShared`去避免在典型的不可重入的场景必须检测保持的计数器。
 3. 如果步骤2失败，要么是线程不符合条件，要么CAS失败，要么计数器值溢出，链接到方法`fullTryAcquireShared`。
 
- 接下去看看完整版本的获取读锁`fullTryAcquireShared`的代码：
- 
+接下去看看完整版本的获取读锁`fullTryAcquireShared`的代码：
+<?prettify linenums=1?>
         /**
          * Full version of acquire for reads, that handles CAS misses
          * and reentrant reads not dealt with in tryAcquireShared.
@@ -460,7 +459,7 @@ __ReentrantReadWriteLock中的AQS__
  获取读锁的完整版本，用于处理CAS失误和`tryAcquireShared`没有处理的重入读。
 
  此代码部分和`tryAcquireShared`方法冗余，但是通过不让重试和延迟读保持计数器与`tryAcquireShared`产生复杂的相互作用让总体比较简单。
- 
+<?prettify linenums=1?>
         protected final boolean tryReleaseShared(int unused) {
             Thread current = Thread.currentThread();
             if (firstReader == current) {
@@ -502,7 +501,7 @@ __ReentrantReadWriteLock中的AQS__
 __公平锁 VS 非公平锁__
 
  这两者的区别在于读和写的时候是否需要排队，`ReentrantReadWriteLock`通过下面两个方法来实现的(在上面的分析中提到过)：
- 
+<?prettify linenums=1?>
          boolean writerShouldBlock();
          
          boolean readerShouldBlock();
@@ -510,7 +509,7 @@ __公平锁 VS 非公平锁__
  `writerShouldBlock`在`tryAcquire`方法中被调用，`readerShouldBlock`在`tryAcquireShared`和`fullTryAcquireShared`方法中被调用。
  
  非公平锁中的实现：  
- 
+<?prettify linenums=1?>
         final boolean writerShouldBlock() {
             return false; // writers can always barge
         }
@@ -528,7 +527,7 @@ __公平锁 VS 非公平锁__
  从代码看出，在非公平锁中`writerShouldBlock`永远返回false（意味着不需要阻塞）。`readerShouldBlock`则调用AQS的`apparentlyFirstQueuedIsExclusive`方法，主要是为了避免写线程不确定的饥饿，如果这个线程暂时出现在队列的头部则阻塞，如果存在的话，它是一个写线程。这只是一定概率的影响，因为如果有落后于其它运行的读线程的写线程尚未从队列中弹出，则一个新的读线程不会阻塞。
  
  公平锁中的实现：
- 
+<?prettify linenums=1?>
         final boolean writerShouldBlock() {
             return hasQueuedPredecessors();
         }
@@ -541,13 +540,13 @@ __公平锁 VS 非公平锁__
 ## 锁API使用
 
 以下是通用API：
-
+<?prettify linenums=1?>
     final ReadWriteLock rwl = new ReentrantReadWriteLock();  
     final Lock readLock = rwl.readLock();  
     final Lock writeLock = rwl.writeLock();
         
 如果想要使用更加强大的功能，请使用下面的API：  
- 
+<?prettify linenums=1?>
     final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();   
     final ReentrantReadWriteLock.ReadLock readLock = rwl.readLock();  
     final ReentrantReadWriteLock.WriteLock writeLock = rwl.writeLock();
