@@ -11,7 +11,7 @@ tags: [Performance]
 
 [Java 8](https://jdk8.java.net/)正在开发中，它为[JVM](http://en.wikipedia.org/wiki/Java_virtual_machine)上最广泛使用的语言带来了许多新特性。可能最常被提到的功能是`lambdas`，这让`Scala`和`JRuby`的爱好者将发布“最后”一声叹息。不那么华丽，但是对某些类别的多线程应用非常重要，是增加了[LongAdder](http://download.java.net/jdk8/docs/api/java/util/concurrent/atomic/LongAdder.html)和[DoubleAdder](http://download.java.net/jdk8/docs/api/java/util/concurrent/atomic/DoubleAdder.html)，原子序列的实现，它在多线程并发环境下相比[AtomicInteger](http://download.java.net/jdk8/docs/api/java/util/concurrent/atomic/AtomicInteger.html)和[AtomicLong](http://download.java.net/jdk8/docs/api/java/util/concurrent/atomic/AtomicLong.html)提供了更加卓越的性能。
 
-一些简单的基准测试显示了两者之间的性能差异，以下标准我们使用了一个[m3.2xlarge EC2](http://aws.amazon.com/ec2/instance-types/instance-details/)实例，它提供了访问英特尔至强`E5-2670`的所有8个内核。
+一些简单的基准测试显示了两者之间的性能差异，以下基准测试我们使用了一个[m3.2xlarge EC2](http://aws.amazon.com/ec2/instance-types/instance-details/)实例，它提供了访问英特尔至强`E5-2670`的所有8个内核。
  
 <img class="imgaligncenter" src="/images/long-adder-vs-atomic-long-1.png" />
 
@@ -25,7 +25,7 @@ tags: [Performance]
 
 <img class="imgaligncenter" src="/images/long-adder-vs-atomic-long-2.png" />
 
-虽然`AtomicLong`在单线程情况下更快，它迅速失去和`LongAdder`的优势，在两个线程的时候比`LongAdder`慢了将近`4`倍，线程数达到机器的核心数时慢了将近5倍。更令人印象深刻的是，`LongAdder`的表现是恒定的，直到线程的数量超过CPU的物理核心数量（在例4）。
+虽然`AtomicLong`在单线程情况下更快，它迅速失去和`LongAdder`的优势，在两个线程的时候比`LongAdder`慢了将近`4`倍，线程数达到机器的核心数时慢了将近`5`倍。更令人印象深刻的是，`LongAdder`的表现是恒定的，直到线程的数量超过CPU的物理核心数量（在例4）。
 
 #### 每个周期的指令数
 
@@ -33,13 +33,14 @@ tags: [Performance]
 
 每个周期的指令数测量CPU有多少工作需要做。当它等待内存加载或者缓存一致性协议来解决。在这种情况下，我们看到`AtomicLong`在多线程环境下糟糕透顶的`IPC`。核心数从4到8的性能下降可能是因为这款CPU有4个核心，每个核心有两个硬件线程，并且硬件线程实际上没有帮助。
 
-#### Idle time
+#### 空闲时间
 
-The  execution pipeline on the processor is divided into two major groups: the front end, responsible for fetching & decoding operations, and the back end, which executes the instructions. There isn’t much interesting happening with operation fetching, so let’s skip the front end.
+处理器的执行管道分为两大组：前端部分，负责提取和解码操作，后端执行指令。在提取操作时，没有太多有趣的事情发生，所以让我们跳过前端处理。
 
 <img class="imgaligncenter" src="/images/long-adder-vs-atomic-long-4.png" />
 
-Activity on the back end gives more insight as to what is going on, showing the AtomicLong implementation leaving more than twice as many cycles idle.  AtomicLong’s high idle time is analogous to its poor instructions per cycle: the CPU’s cores are spending a lot of time deciding which of them gets to control the cache line containing the AtomicLong.
+后端的活动提供了更多的关于是怎么回事的了解，上图显示了`AtomicLong`留下超过两倍多的空闲周期。`AtomicLong`的高空闲时间类似于每个CPU周期其拙劣的指令：`CPU`的核心花费了大量的时间去决定哪个核心控制包含`AtomicLong`的高速缓存行。
+
 
 #### 参考资料
 
