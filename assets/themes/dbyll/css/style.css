@@ -85,3 +85,11 @@ footer {
      left: inherit;
      right: 0px;
  }
+.imgaligncenter {
+    border: 1px solid #ddd;
+	max-width: 97.5%;
+    clear: both;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
