@@ -9,7 +9,7 @@ tags: [concurrent]
 
 `volatile` 关键字在有些场景能提供比 `synchronized` 更好的性能。
 
-先来看看[java language specification(Java SE 7)](http://docs.oracle.com/javase/specs/jls/se7/html/index.html)上面的描述：
+先来看看[Java language specification(Java SE 7)](http://docs.oracle.com/javase/specs/jls/se7/html/index.html)上面的描述：
 
 [原文地址](http://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.3.1.4)
 
@@ -64,7 +64,5 @@ Java编程语言提供了第二种机制，`volatile` 字段，它在某些目�
 
 *这允许 `one` 方法和 `two` 方法并发地执行，这只是保证访问共享变量 `i` 和 `j` 的值正好出现相同的次数，并且以完全相同的顺序，因为他们似乎发生在执行程序文本的每个线程中。因此，共享变量 `j` 的值从来都不会比 `i` 的值大，因为在更新 `j` 之前，`i` 的每次更新都必须取得 `i` 的共享区域的值。这是可能的，然而，`two` 方法的任意调用都有可能使观察到`j`的值比观察到的 `i` 的值大，因为当 `two` 方法取 `i` 的值的瞬间和 `two` 方法取 `j` 的值的瞬间，`one` 方法可能被执行了多次。*
 
-*见[§17.4](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4)的更多讨论和示例。*
-
-上面提到了Java内存模型，这里有必要对Java的内存模型做一个介绍。
+*见[§17.4](/Java/2014/03/03/java-memory-model/)的更多讨论和示例。*
 
