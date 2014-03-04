@@ -23,7 +23,7 @@ tags: [JLS]
 
 *考虑，例如表17.1所示的示例程序的跟踪。这个程序使用局部变量 `r1` 和 `r2` 和共享变量 `A` 和 `B` 。最初，`A == B == 0`。*
 
-#### 表 17.1. 语句重排序造成的令人惊讶的结果 - 原始代码
+#### 表 17.1 语句重排序造成的令人惊讶的结果 - 原始代码
 
 <table class="table table-striped table-bordered" style="width:50%">
     <tr><th>Thread 1</th><th>Thread 2</th></tr>
@@ -37,4 +37,39 @@ tags: [JLS]
 
 *然而，当不影响线程隔离执行时，在任何线程中，编译器都被允许对指令重新排序。如果指令1和指令2重排序，如表17.2所示的跟踪，那么很容易看到可能的运行结果 `r2 == 2 并且 r1 == 1` 。*
 
-Table 17.2. Surprising results caused by statement reordering - valid compiler transformation
+#### 表 17.2 语句重排序造成的出人意外的结果 － 有效的编译器转换
+
+<table class="table table-striped table-bordered" style="width:50%">
+    <tr><th>Thread 1</th><th>Thread 2</th></tr>
+    <tr><td>B = 1;</td><td>r1 = B;</td></tr>
+    <tr><td>r2 = A;</td><td>A = 2;</td></tr>
+</table>
+
+*对于一些程序员，这个行为可能看起来“破碎的”。然而，应该指出的是，这个代码是错误的同步：*
+
+- *一个线程写变量*
+
+- *另一个线程读同一个变量*
+
+- *并且写入和读取没有用同步排序。*
+
+*这种情况是数据争用的一个例子（[§17.4.5](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.5)）。当代码包含数据争用，往往可能有违反直觉的结果。*
+
+ *在表17.2中有几种机制可以产生重排序。Java虚拟机实现中的即时编译器（`JIT`）可能重新排列代码或处理器。此外，Java虚拟机实现的内存层次结构可能使其看起来好像正在重新排列代码。在这一章，作为编译器，我们应该参考凡是能够重排序的代码。*
+
+*意外结果的另一个例子可以在表17.3看到。最初， `p == q 并且 p.x == 0` 。这个程序也是不正确的同步；其写入共享内存并没有在这些写入操作之间强制排序。*
+
+#### 表17.3 前向替换造成的出人意外的结果
+
+<table class="table table-striped table-bordered" style="width:50%">
+    <tr><th>Thread 1</th><th>Thread 2</th></tr>
+    <tr><td>r1 = p;</td><td>r6 = p;</td></tr>
+    <tr><td>r2 = r1.x;</td><td>r6.x = 3;</td></tr>
+    <tr><td>r3 = q;	</td><td></td></tr>
+    <tr><td>r4 = r3.x;</td><td></td></tr>
+    <tr><td>r5 = r1.x;</td><td></td></tr>
+</table>
+
+*一个常见的编译器优化涉及到读取到的 `r2` 的值重新用于 `r5` 。它们都是在没有写干预的情况下读取 `r1.x`。这个情况如表17.4所示。*
+
+#### Table 17.4. Surprising results caused by forward substitution
