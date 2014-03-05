@@ -57,7 +57,7 @@ tags: [JLS]
 
  *在表17.2中有几种机制可以产生重排序。Java虚拟机实现中的即时编译器（`JIT`）可能重新排列代码或处理器。此外，Java虚拟机实现的内存层次结构可能使其看起来好像正在重新排列代码。在这一章，作为编译器，我们应该参考凡是能够重排序的代码。*
 
-*意外结果的另一个例子可以在表17.3看到。最初， `p == q 并且 p.x == 0` 。这个程序也是不正确的同步；其写入共享内存并没有在这些写入操作之间强制排序。*
+*意外结果的另一个例子可以在表17.3看到。最初， `p == q && p.x == 0` 。这个程序也是不正确的同步；其写入共享内存并没有在这些写入操作之间强制排序。*
 
 #### 表17.3 前向替换造成的出人意外的结果
 
@@ -72,4 +72,27 @@ tags: [JLS]
 
 *一个常见的编译器优化涉及到读取到的 `r2` 的值重新用于 `r5` 。它们都是在没有写干预的情况下读取 `r1.x`。这个情况如表17.4所示。*
 
-#### Table 17.4. Surprising results caused by forward substitution
+#### 表17.4 前向替换造成的出人意外的结果
+
+<table class="table table-striped table-bordered" style="width:50%">
+    <tr><th>Thread 1</th><th>Thread 2</th></tr>
+    <tr><td>r1 = p;</td><td>r6 = p;</td></tr>
+    <tr><td>r2 = r1.x;</td><td>r6.x = 3;</td></tr>
+    <tr><td>r3 = q;	</td><td></td></tr>
+    <tr><td>r4 = r3.x;</td><td></td></tr>
+    <tr><td>r5 = r2;</td><td></td></tr>
+</table>
+
+*现在考虑这个情况：在 `Thread 1` 第一次读取 `r1.x` 和读取 `r3.x` 期间，在 `Thread 2` 中给 `r6.x` 赋值。如果编译器决定重用 `r2` 的值给 `r5`，那么 `r2` 和 `r5` 的值将为0，并且 `r4` 的值将为3。从程序员的角度，`p.x` 的值从0变为3，然后又变回0。*
+
+The memory model determines what values can be read at every point in the program. The actions of each thread in isolation must behave as governed by the semantics of that thread, with the exception that the values seen by each read are determined by the memory model. When we refer to this, we say that the program obeys intra-thread semantics. Intra-thread semantics are the semantics for single-threaded programs, and allow the complete prediction of the behavior of a thread based on the values seen by read actions within the thread. To determine if the actions of thread t in an execution are legal, we simply evaluate the implementation of thread t as it would be performed in a single-threaded context, as defined in the rest of this specification.
+
+内存模型决定在程序的每个点哪些值可以被读取。每个孤立的线程的活动必须表现为被那个线程的语义管理，除每个线程看到的值是由内存模型决定的之外。我们说程序服从`intra-thread`语义。`Intra-thread`语义是单线程程序的语义，并且允许根据线程中读取动作看到的值完整预测一个线程的行为。为了决定线程t执行的动作是否合法，
+
+Each time the evaluation of thread t generates an inter-thread action, it must match the inter-thread action a of t that comes next in program order. If a is a read, then further evaluation of t uses the value seen by a as determined by the memory model.
+
+This section provides the specification of the Java programming language memory model except for issues dealing with final fields, which are described in [§17.5](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.5).
+
+*The memory model specified herein is not fundamentally based in the object-oriented nature of the Java programming language. For conciseness and simplicity in our examples, we often exhibit code fragments without class or method definitions, or explicit dereferencing. Most examples consist of two or more threads containing statements with access to local variables, shared global variables, or instance fields of an object. We typically use variables names such as r1 or r2 to indicate variables local to a method or thread. Such variables are not accessible by other threads.*
+
+#### 17.4.1. Shared Variables
