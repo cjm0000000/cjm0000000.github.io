@@ -85,14 +85,50 @@ tags: [JLS]
 
 *现在考虑这个情况：在 `Thread 1` 第一次读取 `r1.x` 和读取 `r3.x` 期间，在 `Thread 2` 中给 `r6.x` 赋值。如果编译器决定重用 `r2` 的值给 `r5`，那么 `r2` 和 `r5` 的值将为0，并且 `r4` 的值将为3。从程序员的角度，`p.x` 的值从0变为3，然后又变回0。*
 
-The memory model determines what values can be read at every point in the program. The actions of each thread in isolation must behave as governed by the semantics of that thread, with the exception that the values seen by each read are determined by the memory model. When we refer to this, we say that the program obeys intra-thread semantics. Intra-thread semantics are the semantics for single-threaded programs, and allow the complete prediction of the behavior of a thread based on the values seen by read actions within the thread. To determine if the actions of thread t in an execution are legal, we simply evaluate the implementation of thread t as it would be performed in a single-threaded context, as defined in the rest of this specification.
+内存模型决定在程序的每个点哪些值可以被读取。每个孤立的线程的活动必须表现为被那个线程的语义管理，除每个线程看到的值是由内存模型决定的之外。我们说程序服从`intra-thread`语义。`Intra-thread`语义是单线程程序的语义，并且允许根据线程中读取动作看到的值完整预测一个线程的行为。为了决定线程t执行的动作是否合法，我们简单地计算线程t以它将在单线程上下文中执行的实现，如在本说明书的其他部分的定义。
 
-内存模型决定在程序的每个点哪些值可以被读取。每个孤立的线程的活动必须表现为被那个线程的语义管理，除每个线程看到的值是由内存模型决定的之外。我们说程序服从`intra-thread`语义。`Intra-thread`语义是单线程程序的语义，并且允许根据线程中读取动作看到的值完整预测一个线程的行为。为了决定线程t执行的动作是否合法，
+每次`t`线程的计算产生一个跨线程动作，它必须与程序指令中紧随其后的`t`线程的跨线程动作`a`相匹配。如果`a`是一个读指令，那么`a`看到的`t`线程进一步计算使用的值由内存模型决定。
 
-Each time the evaluation of thread t generates an inter-thread action, it must match the inter-thread action a of t that comes next in program order. If a is a read, then further evaluation of t uses the value seen by a as determined by the memory model.
+本节提供了Java编程语言的内存模型规范，除了处理`final`字段的问题，这在[§17.5](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.5)中描述。
 
-This section provides the specification of the Java programming language memory model except for issues dealing with final fields, which are described in [§17.5](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.5).
+*此处指定的内存模型没有从根本上基于Java编程语言的面向对象本质。为了我们的例子简洁和简单，我们通常展示的代码片段不包含类或方法定义，或显式非关联。大多数例子的语句包含由两个或更多线程访问局部变量，共享全局变量或者对象实例字段。我们通常使用 `r1` 或 `r2` 这样的名称来表示方法或者线程的局部变量。这样的变量不能被其他线程访问。*
 
-*The memory model specified herein is not fundamentally based in the object-oriented nature of the Java programming language. For conciseness and simplicity in our examples, we often exhibit code fragments without class or method definitions, or explicit dereferencing. Most examples consist of two or more threads containing statements with access to local variables, shared global variables, or instance fields of an object. We typically use variables names such as r1 or r2 to indicate variables local to a method or thread. Such variables are not accessible by other threads.*
+#### 17.4.1. 共享变量
 
-#### 17.4.1. Shared Variables
+可以被线程之间共享的内存叫做*共享内存* 或者*堆内存*。
+
+所有实例字段，静态字段和数组元素都存在堆内存。在本章中，我们把字段和数组元素都用术语变量来表示。
+
+本地变量（[§14.4](http://docs.oracle.com/javase/specs/jls/se7/html/jls-14.html#jls-14.4)），方法形参（[§8.4.1](http://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.4.1)）和异常处理参数（[§14.20](http://docs.oracle.com/javase/specs/jls/se7/html/jls-14.html#jls-14.20)）从未在线程间共享，并且不受内存模型影响。
+
+如果至少有一个线程是写入访问，那么两个线程访问（读取或写入）同一个变量据说是冲突的。
+
+#### 17.4.2. 操作
+
+一个线程间操作是一个线程执行的操作可以被检测或者被另一个线程直接影响。一个程序可以执行很多不同的跨线程操作：
+
+- 读（常规的，或非`volatile`）。读取变量。
+
+- 写（常规的，或非`volatile`）。写入变量。
+
+- 同步操作，也就是：
+    
+    - Volatile读。一个变量的`volatile`读取。
+    
+    - Volatile写。一个变量的`volatile`写入。
+    
+    - Lock。锁定监视器。
+    
+    - Unlock。解锁监视器。
+    
+    - 一个线程的（`synthetic`）第一个和最后一个动作。
+    
+    - 启动一个线程或者检测一个线程已终止的动作([§17.4.4](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.4))。
+    
+- External Actions. An external action is an action that may be observable outside of an execution, and has a result based on an environment external to the execution.
+
+- Thread divergence actions ([§17.4.9](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.9)). A thread divergence action is only performed by a thread that is in an infinite loop in which no memory, synchronization, or external actions are performed. If a thread performs a thread divergence action, it will be followed by an infinite number of thread divergence actions.
+
+*Thread divergence actions are introduced to model how a thread may cause all other threads to stall and fail to make progress.*
+
+
