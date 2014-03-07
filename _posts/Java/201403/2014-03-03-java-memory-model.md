@@ -124,11 +124,33 @@ tags: [JLS]
     - 一个线程的（`synthetic`）第一个和最后一个动作。
     
     - 启动一个线程或者检测一个线程已终止的动作([§17.4.4](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.4))。
+
+- 外部操作。一个外部操作是一个可以被执行外部观察到的动作，并且有一个以执行之外的环境为基础的结果。
+
+- 线程分支操作（[§17.4.9](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.9)）。一个线程分支是只由一个线程无限循环执行，在其中没有内存（*笔者感觉是共享内存*），同步，或者外部操作执行。如果一个线程执行一个线程分支操作，其后将跟随无限数量的线程分支操作。
+
+    *线程分支操作被引入到模型——如何让一个线程可能造成其他所有线程拖延并且不能取得进展*
+
+本规范只涉及跨线程操作。我们不需要关心自己与跨线程操作（比如，两个局部变量求和并且把结果存到第三个局部变量）。正如前面提到的，所有线程需要服从Java程序的正确的线程内语义。我们通常会把跨线程操作简单地称作简单*操作*。
+
+一个操作由一个元组*< t, k, v, u >*描述，包含：
+
+- `t` - 执行操作的线程
+
+- `k` - 操作的种类
+
+- `v` - 操作相关的变量或者监视器
+
+    对于锁定操作，*v*是正在被锁定的监视器；对于解锁操作，*v*是正在被解锁的监视器。
     
-- External Actions. An external action is an action that may be observable outside of an execution, and has a result based on an environment external to the execution.
+    如果是一个读（volatile或非volatile）操作，*v*是一个正在被读的变量。
+    
+    如果是一个写（volatile或非volatile）操作，*v*是一个正在被写的变量。
 
-- Thread divergence actions ([§17.4.9](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.9)). A thread divergence action is only performed by a thread that is in an infinite loop in which no memory, synchronization, or external actions are performed. If a thread performs a thread divergence action, it will be followed by an infinite number of thread divergence actions.
+- `u` - 对于操作的任意唯一标示符
 
-*Thread divergence actions are introduced to model how a thread may cause all other threads to stall and fail to make progress.*
+一个外部操作元组包含附加组件，它包含了线程执行操作时觉察到的外部操作的结果。这可以是关于操作成功或者失败的信息，以及操作读取的其它任何值。
 
+外部操作的参数（比如，写入任何套接字的任何字节）不是外部操作元组的一部分。这些参数都是被线程中的其它操作设置的并且可以通过检查线程内语义确定。他们在内存模型中没有明确探讨过。
 
+在非中断执行中，不是所有的外部操作都能被觉察到。非中断执行和可观察操作在[§17.4.9](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.9)中讨论。
