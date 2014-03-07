@@ -154,3 +154,23 @@ tags: [JLS]
 外部操作的参数（比如，写入任何套接字的任何字节）不是外部操作元组的一部分。这些参数都是被线程中的其它操作设置的并且可以通过检查线程内语义确定。他们在内存模型中没有明确探讨过。
 
 在非中断执行中，不是所有的外部操作都能被觉察到。非中断执行和可观察操作在[§17.4.9](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.9)中讨论。
+
+#### 17.4.3. 程序和程序顺序
+
+在每个线程t执行的所有跨线程操作中，`t`的程序顺序是一个总的顺序，它反映了这些操作将根据`t`的线程内语义执行的顺序。
+
+如果所有操作的发生在一个全序（执行顺序），一组操作的顺序是一致的，这与程序顺序一致，并且更进一步，每个对变量`v`的读`r`都看到了`w`对`v`写入的值：
+
+- `w` 执行顺序在`r`之前，并且
+
+- 没有其他`w`写入，如`w1`在`w2`之前，并且`w2`在`r`之前，这样的执行顺序。
+
+Sequential consistency is a very strong guarantee that is made about visibility and ordering in an execution of a program. Within a sequentially consistent execution, there is a total order over all individual actions (such as reads and writes) which is consistent with the order of the program, and each individual action is atomic and is immediately visible to every thread.
+
+If a program has no data races, then all executions of the program will appear to be sequentially consistent.
+
+Sequential consistency and/or freedom from data races still allows errors arising from groups of operations that need to be perceived atomically and are not.
+
+*If we were to use sequential consistency as our memory model, many of the compiler and processor optimizations that we have discussed would be illegal. For example, in the trace in Table 17.3, as soon as the write of 3 to p.x occurred, subsequent reads of that location would be required to see that value.*
+
+#### 17.4.4. Synchronization Order
