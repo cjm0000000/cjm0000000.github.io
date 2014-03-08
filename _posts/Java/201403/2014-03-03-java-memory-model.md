@@ -165,9 +165,9 @@ tags: [JLS]
 
 - 没有其他`w`写入，如`w1`在`w2`之前，并且`w2`在`r`之前，这样的执行顺序。
 
-Sequential consistency is a very strong guarantee that is made about visibility and ordering in an execution of a program. Within a sequentially consistent execution, there is a total order over all individual actions (such as reads and writes) which is consistent with the order of the program, and each individual action is atomic and is immediately visible to every thread.
+顺序一致性是由程序执行相关的可见性和执行顺序来保证的。在一个一致的顺序执行中，在个别的操作（比如读和写）之上有一个总的顺序，这与程序的执行顺序一致，并且每个操作都是原子的并且对每个线程都立即可见。
 
-If a program has no data races, then all executions of the program will appear to be sequentially consistent.
+如果程序没有数据竞争，那么程序所有执行将显示为顺序一致。
 
 Sequential consistency and/or freedom from data races still allows errors arising from groups of operations that need to be perceived atomically and are not.
 
