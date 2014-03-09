@@ -169,8 +169,30 @@ tags: [JLS]
 
 如果程序没有数据竞争，那么程序所有执行将显示为顺序一致。
 
-Sequential consistency and/or freedom from data races still allows errors arising from groups of operations that need to be perceived atomically and are not.
+数据竞争的顺序一致性和/或自由度仍然允许一组操作产生错误，这需要（或不需要）以原子的方式感知。
 
-*If we were to use sequential consistency as our memory model, many of the compiler and processor optimizations that we have discussed would be illegal. For example, in the trace in Table 17.3, as soon as the write of 3 to p.x occurred, subsequent reads of that location would be required to see that value.*
+*如果我们把顺序一致性当作内存模型，很多我们讨论的编译器和处理器优化将是非法的。例如，在表17.3的跟踪，一旦把 3写入 `p.x`，随后该位置的读取将要看到该值。*
 
-#### 17.4.4. Synchronization Order
+#### 17.4.4. 同步顺序
+
+每次执行都有一个*同步顺序*。一个同步顺序是一个执行中所有同步操作的总的顺序。对于每个线程`t`，`t`的同步操作([§17.4.2](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.2))的同步顺序与`t`的程序顺序([§17.4.3](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.3))是一致的。
+
+同步操作在操作上引起*synchronized-with*关系，定义如下：
+
+- 监视器`m`上的解锁操作和后续的锁定操作同步（这里的“后续”是根据同步顺序定义的）。
+
+- 写入一个`volatile`变量`v`([§8.3.1.4](http://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.3.1.4))与任何线程的所有后续对`v`的读取同步（这里的“后续”是根据同步顺序定义的）。
+
+- 启动一个线程的操作与线程启动的第一个操作同步。
+
+- 每个变量默认值（`0`，`false`或者`null`）的写入与每个线程的第一个操作同步。
+
+    尽管在包含变量的对象被分配之前给变量写入一个默认值可能看起来有点奇怪，概念上讲，每个对象在程序开始的时候用默认初始值被创建。
+
+- `T1`线程的`final`操作与另一个发现`T1`已经终止的`T2`线程的任何操作同步。
+
+    `T2`可以通过调用`T1.isAlive()`或者`T1.join()`做到这一点。
+
+如果`T1`线程中断`T2`线程，`T1`产生的中断与任何点的任何发现T2已经被中断的其它线程（包括T2）同步（通过让其抛出`InterruptedException`异常，或者通过调用`Thread.interrupted`或`Thread.isInterrupted`方法）。
+
+*synchronizes-with*边缘的来源被称作释放，而目的地被称作获取。
