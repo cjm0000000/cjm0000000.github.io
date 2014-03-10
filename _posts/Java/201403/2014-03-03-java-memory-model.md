@@ -196,3 +196,95 @@ tags: [JLS]
 如果`T1`线程中断`T2`线程，`T1`产生的中断与任何点的任何发现T2已经被中断的其它线程（包括T2）同步（通过让其抛出`InterruptedException`异常，或者通过调用`Thread.interrupted`或`Thread.isInterrupted`方法）。
 
 *synchronizes-with*边缘的来源被称作释放，而目的地被称作获取。
+
+#### 17.4.5. Happens-before 顺序
+
+Two actions can be ordered by a *happens-before* relationship. If one action *happens-before* another, then the first is visible to and ordered before the second.
+
+If we have two actions x and y, we write hb(x, y) to indicate that x happens-before y.
+
+- If x and y are actions of the same thread and x comes before y in program order, then hb(x, y).
+
+- There is a happens-before edge from the end of a constructor of an object to the start of a finalizer ([§12.6](http://docs.oracle.com/javase/specs/jls/se7/html/jls-12.html#jls-12.6)) for that object.
+
+- If an action x synchronizes-with a following action y, then we also have hb(x, y).
+
+- If hb(x, y) and hb(y, z), then hb(x, z).
+
+The wait methods of class Object ([§17.2.1](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.2.1)) have lock and unlock actions associated with them; their happens-before relationships are defined by these associated actions.
+
+It should be noted that the presence of a happens-before relationship between two actions does not necessarily imply that they have to take place in that order in an implementation. If the reordering produces results consistent with a legal execution, it is not illegal.
+
+*For example, the write of a default value to every field of an object constructed by a thread need not happen before the beginning of that thread, as long as no read ever observes that fact.*
+
+More specifically, if two actions share a happens-before relationship, they do not necessarily have to appear to have happened in that order to any code with which they do not share a happens-before relationship. Writes in one thread that are in a data race with reads in another thread may, for example, appear to occur out of order to those reads.
+
+The *happens-before* relation defines when data races take place.
+
+A set of synchronization edges, S, is sufficient if it is the minimal set such that the transitive closure of S with the program order determines all of the happens-before edges in the execution. This set is unique.
+
+It follows from the above definitions that:
+
+- An unlock on a monitor happens-before every subsequent lock on that monitor.
+
+- A write to a volatile field ([§8.3.1.4](http://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.3.1.4)) happens-before every subsequent read of that field.
+
+- A call to start() on a thread happens-before any actions in the started thread.
+
+- All actions in a thread happen-before any other thread successfully returns from a join() on that thread.
+
+- The default initialization of any object happens-before any other actions (other than default-writes) of a program.
+
+When a program contains two conflicting accesses ([§17.4.1](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.1)) that are not ordered by a happens-before relationship, it is said to contain a data race.
+
+The semantics of operations other than inter-thread actions, such as reads of array lengths ([§10.7](http://docs.oracle.com/javase/specs/jls/se7/html/jls-10.html#jls-10.7)), executions of checked casts ([§5.5](http://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.5), [§15.16](http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.16)), and invocations of virtual methods ([§15.12](http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.12)), are not directly affected by data races.
+
+*Therefore, a data race cannot cause incorrect behavior such as returning the wrong length for an array.*
+
+A program is correctly synchronized if and only if all sequentially consistent executions are free of data races.
+
+If a program is correctly synchronized, then all executions of the program will appear to be sequentially consistent ([§17.4.3](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.3)).
+
+*This is an extremely strong guarantee for programmers. Programmers do not need to reason about reorderings to determine that their code contains data races. Therefore they do not need to reason about reorderings when determining whether their code is correctly synchronized. Once the determination that the code is correctly synchronized is made, the programmer does not need to worry that reorderings will affect his or her code.*
+
+*A program must be correctly synchronized to avoid the kinds of counterintuitive behaviors that can be observed when code is reordered. The use of correct synchronization does not ensure that the overall behavior of a program is correct. However, its use does allow a programmer to reason about the possible behaviors of a program in a simple way; the behavior of a correctly synchronized program is much less dependent on possible reorderings. Without correct synchronization, very strange, confusing and counterintuitive behaviors are possible.*
+
+We say that a read r of a variable v is allowed to observe a write w to v if, in the happens-before partial order of the execution trace:
+
+- r is not ordered before w (i.e., it is not the case that hb(r, w)), and
+
+- there is no intervening write w' to v (i.e. no write w' to v such that hb(w, w') and hb(w', r)).
+
+Informally, a read r is allowed to see the result of a write w if there is no happens-before ordering to prevent that read.
+
+A set of actions A is happens-before consistent if for all reads r in A, where W(r) is the write action seen by r, it is not the case that either hb(r, W(r)) or that there exists a write w in A such that w.v = r.v and hb(W(r), w) and hb(w, r).
+
+In a happens-before consistent set of actions, each read sees a write that it is allowed to see by the happens-before ordering.
+
+##### Example 17.4.5-1. Happens-before Consistency
+
+For the trace in Table 17.5, initially A == B == 0. The trace can observe r2 == 0 and r1 == 0 and still be happens-before consistent, since there are execution orders that allow each read to see the appropriate write.
+
+##### Table 17.5. Behavior allowed by happens-before consistency, but not sequential consistency.
+
+<table class="table table-striped table-bordered" style="width:50%">
+    <tr><th>Thread 1</th><th>Thread 2</th></tr>
+    <tr><td>B = 1;</td><td>A = 2;</td></tr>
+    <tr><td>r2 = A;</td><td>r1 = B;</td></tr>
+</table>
+
+*Since there is no synchronization, each read can see either the write of the initial value or the write by the other thread. An execution order that displays this behavior is:*
+<?prettify linenums=1?>
+    B = 1;
+    A = 2;
+    r2 = A;  // sees initial write of 0
+    r1 = B;  // sees initial write of 0
+    
+*Another execution order that is happens-before consistent is:*
+<?prettify linenums=1?>
+    r2 = A;  // sees write of A = 2
+    r1 = B;  // sees write of B = 1
+    B = 1;
+    A = 2;
+    
+*In this execution, the reads see writes that occur later in the execution order. This may seem counterintuitive, but is allowed by happens-before consistency. Allowing reads to see later writes can sometimes produce unacceptable behaviors.*
