@@ -199,19 +199,19 @@ tags: [JLS]
 
 #### 17.4.5. Happens-before 顺序
 
-Two actions can be ordered by a *happens-before* relationship. If one action *happens-before* another, then the first is visible to and ordered before the second.
+两个操作可以被一个*happens-before*关系排序。如果一个操作发生在另一个操作之前，那么第一个是可见的并且在第二个之前。
 
-If we have two actions x and y, we write hb(x, y) to indicate that x happens-before y.
+如果我们有`x`和`y`两个操作，我们用`hb(x, y)`来表示`x`发生在`y`之前。
 
-- If x and y are actions of the same thread and x comes before y in program order, then hb(x, y).
+- 如果`x`和`y`操作是相同线程里的并且在程序顺序中`x`在`y`之前，那么`hb(x, y)`。
 
-- There is a happens-before edge from the end of a constructor of an object to the start of a finalizer ([§12.6](http://docs.oracle.com/javase/specs/jls/se7/html/jls-12.html#jls-12.6)) for that object.
+- 从一个对象的构造器的末尾到那个对象垃圾回收（`finalizer`）的开始，有一个*happens-before*边缘。
 
-- If an action x synchronizes-with a following action y, then we also have hb(x, y).
+- 如果一个`x`操作和一个随后的`y`操作同步，那么我们也有`hb(x, y)`。
 
-- If hb(x, y) and hb(y, z), then hb(x, z).
+- 如果`hb(x, y)`并且`hb(y, z)`，那么`hb(x, z)`。
 
-The wait methods of class Object ([§17.2.1](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.2.1)) have lock and unlock actions associated with them; their happens-before relationships are defined by these associated actions.
+`Object`类([§17.2.1](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.2.1))的`wait`系列方法有与之相关的锁定和解锁操作；他们的*happens-before*关系由这些相关联的动作定义。
 
 It should be noted that the presence of a happens-before relationship between two actions does not necessarily imply that they have to take place in that order in an implementation. If the reordering produces results consistent with a legal execution, it is not illegal.
 
