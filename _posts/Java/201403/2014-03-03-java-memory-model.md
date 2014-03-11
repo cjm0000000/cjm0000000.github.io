@@ -213,13 +213,13 @@ tags: [JLS]
 
 `Object`类([§17.2.1](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.2.1))的`wait`系列方法有与之相关的锁定和解锁操作；他们的*happens-before*关系由这些相关联的动作定义。
 
-It should be noted that the presence of a happens-before relationship between two actions does not necessarily imply that they have to take place in that order in an implementation. If the reordering produces results consistent with a legal execution, it is not illegal.
+应当指出的是，*happens-before*关系在两个操作之间的存在，并不一定意味着它们在实现中必须按照那个顺序。如果重排序产生的结果与合法执行的一致，它(*重排序*)并不违法。
 
-*For example, the write of a default value to every field of an object constructed by a thread need not happen before the beginning of that thread, as long as no read ever observes that fact.*
+*例如，由一个线程构造的一个对象的每个字段的默认值的写入不必发生在那个线程开始之前，只要没有读者曾经发现过那个事实。*
 
-More specifically, if two actions share a happens-before relationship, they do not necessarily have to appear to have happened in that order to any code with which they do not share a happens-before relationship. Writes in one thread that are in a data race with reads in another thread may, for example, appear to occur out of order to those reads.
+更具体地说，如果两个操作共享一个*happens-before*关系，对于任何与他们没有共享一个*happens-before*关系的代码，他们不一定必须出现已经发生的顺序。一个线程中的写可能与其它线程的读存在数据争用，例如，似乎发生的乱序读。
 
-The *happens-before* relation defines when data races take place.
+当数据争用发生时定义*happens-before*关系。
 
 A set of synchronization edges, S, is sufficient if it is the minimal set such that the transitive closure of S with the program order determines all of the happens-before edges in the execution. This set is unique.
 
