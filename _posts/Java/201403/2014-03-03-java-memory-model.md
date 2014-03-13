@@ -221,33 +221,35 @@ tags: [JLS]
 
 当数据争用发生时定义*happens-before*关系。
 
-A set of synchronization edges, S, is sufficient if it is the minimal set such that the transitive closure of S with the program order determines all of the happens-before edges in the execution. This set is unique.
+一组同步边缘，如果`S`是最小的集合使得程序顺序中`S`的传递闭包决定执行中所有的*happens-before*边缘，`S`是足够的。这个集合是独一无二的。
 
-It follows from the above definitions that:
+它遵循由上述的定义：
 
-- An unlock on a monitor happens-before every subsequent lock on that monitor.
+- 监视器上的解锁操作比该监视器上后续的每个加锁操作先发生。
 
-- A write to a volatile field ([§8.3.1.4](http://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.3.1.4)) happens-before every subsequent read of that field.
+- `volatile`字段([§8.3.1.4](http://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.3.1.4))的写入比这个字段后续的读取先发生。
 
-- A call to start() on a thread happens-before any actions in the started thread.
+- 线程中`start()`方法的调用比已启动的线程中的任何操作先发生。
 
-- All actions in a thread happen-before any other thread successfully returns from a join() on that thread.
+- 一个线程中所有的操作都比任何其他线程成功从该线程`join()`（返回）先发生。
 
-- The default initialization of any object happens-before any other actions (other than default-writes) of a program.
+- 任何对象的默认初始化比程序的其它操作（默认写除外）先发生。
 
-When a program contains two conflicting accesses ([§17.4.1](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.1)) that are not ordered by a happens-before relationship, it is said to contain a data race.
+当一个程序包含两个冲突的访问不是由一个*happens-before*关系排列，这是说包含一个数据争用。
 
-The semantics of operations other than inter-thread actions, such as reads of array lengths ([§10.7](http://docs.oracle.com/javase/specs/jls/se7/html/jls-10.html#jls-10.7)), executions of checked casts ([§5.5](http://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.5), [§15.16](http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.16)), and invocations of virtual methods ([§15.12](http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.12)), are not directly affected by data races.
+除了跨线程操作之外的语义不直接受数据争用影响，比如读取数组长度([§10.7](http://docs.oracle.com/javase/specs/jls/se7/html/jls-10.html#jls-10.7))，执行强制转换检查([§5.5](http://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.5)，[§15.16](http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.16))，以及虚方法的调用([§15.12](http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.12))。
 
-*Therefore, a data race cannot cause incorrect behavior such as returning the wrong length for an array.*
+*因此，数据争用不会导致不正确的行为，比如返回数组错误的长度。*
 
-A program is correctly synchronized if and only if all sequentially consistent executions are free of data races.
+程序是否能正确同步，当且仅当所有顺序一致的执行可以免于数据争用。
 
-If a program is correctly synchronized, then all executions of the program will appear to be sequentially consistent ([§17.4.3](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.3)).
+如果一个程序正确同步，那么程序的所有执行将显示为顺序一致性([§17.4.3](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.3))。
 
-*This is an extremely strong guarantee for programmers. Programmers do not need to reason about reorderings to determine that their code contains data races. Therefore they do not need to reason about reorderings when determining whether their code is correctly synchronized. Once the determination that the code is correctly synchronized is made, the programmer does not need to worry that reorderings will affect his or her code.*
+*这是程序员的一个强有力的保障。程序员不需要推理重排序去决定其代码中包含的数据争用。因此，他们决定他们的代码是否同步时，不需要推理重排序。一旦代码被判定为正确同步，程序员不必担心重排序会影响他/她的代码。*
 
 *A program must be correctly synchronized to avoid the kinds of counterintuitive behaviors that can be observed when code is reordered. The use of correct synchronization does not ensure that the overall behavior of a program is correct. However, its use does allow a programmer to reason about the possible behaviors of a program in a simple way; the behavior of a correctly synchronized program is much less dependent on possible reorderings. Without correct synchronization, very strange, confusing and counterintuitive behaviors are possible.*
+
+*一个程序必须被正确地同步，以避免各种有悖常理的行为，当代码被重排序时这种行为可被观察到。*
 
 We say that a read r of a variable v is allowed to observe a write w to v if, in the happens-before partial order of the execution trace:
 
