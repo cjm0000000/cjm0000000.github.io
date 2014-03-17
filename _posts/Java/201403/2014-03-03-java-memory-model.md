@@ -247,15 +247,14 @@ tags: [JLS]
 
 *这是程序员的一个强有力的保障。程序员不需要推理重排序去决定其代码中包含的数据争用。因此，他们决定他们的代码是否同步时，不需要推理重排序。一旦代码被判定为正确同步，程序员不必担心重排序会影响他/她的代码。*
 
-*A program must be correctly synchronized to avoid the kinds of counterintuitive behaviors that can be observed when code is reordered. The use of correct synchronization does not ensure that the overall behavior of a program is correct. However, its use does allow a programmer to reason about the possible behaviors of a program in a simple way; the behavior of a correctly synchronized program is much less dependent on possible reorderings. Without correct synchronization, very strange, confusing and counterintuitive behaviors are possible.*
+*一个程序必须被正确地同步，以避免各种有悖常理的行为，当代码被重排序时这种行为可被观察到。使用正确的同步并不能保证程序的整体行为是正确的。然而，它的使用也允许程序员以简单的方式来思考程序可能的行为；正确同步的程序的行为更少依赖可能的重排序。如果没有正确的同步，很奇怪，混乱和违反直觉的行为是可能的。*
 
-*一个程序必须被正确地同步，以避免各种有悖常理的行为，当代码被重排序时这种行为可被观察到。*
+我们说如果允许一个变量`v`的读取`r`观察到对变量`v`的写入`w`，在`happens-before`执行跟踪的不完整顺序：
 
-We say that a read r of a variable v is allowed to observe a write w to v if, in the happens-before partial order of the execution trace:
-
-- r is not ordered before w (i.e., it is not the case that hb(r, w)), and
+- `r`的顺序不在`w`之前（比如，它不是`hb(r, w)`这种情况），并且
 
 - there is no intervening write w' to v (i.e. no write w' to v such that hb(w, w') and hb(w', r)).
+- 没有中间对`v`的写入操作`w'`（比如，没有写入`w'`使得`hb(w, w')`并且hb(w', r)）。
 
 Informally, a read r is allowed to see the result of a write w if there is no happens-before ordering to prevent that read.
 
