@@ -288,3 +288,27 @@ tags: [JLS]
     A = 2;
     
 *在这个执行过程中，读看到的写发生在执行顺序的后面。这似乎有驳常理，但是被happens-before一致性允许。允许读取看到后来的写入有时可以产生不可接受的行为。*
+
+### 17.4.6. Executions
+
+执行`E`由一个元组`< P, A, po, so, W, V, sw, hb >`描述，包含：
+
+- P - 一个程序
+
+- A - 一组操作
+
+- po - 每个线程`t`的程序顺序，是`t`执行的`A`中的所有操作的顺序。
+
+- so - 同步顺序，这是一个`A`中所有同步操作的总的顺序。
+
+- W - 写可见函数，这对`A`中的每个读`r`，给出`W(r)`，`E`中的写操作对`r`可见。
+
+- V - 值写入函数，这对`A`中的每个写`w`，给出`V(w)`，值由`E`中的`w`写入。
+
+- sw - `synchronizes-with`，同步操作的偏序。
+
+- hb - `happens-before`， 操作的偏序。
+
+请注意`synchronizes-with`和`happens-before`元素唯一地由一个执行的其它组件和良好的执行规则([§17.4.7](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.7))来确定。
+
+一个执行是`happens-before`一致的，如果它的操作集合是`happens-before`一致的([§17.4.5](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4.5))。
