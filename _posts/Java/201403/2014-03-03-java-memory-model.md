@@ -253,20 +253,19 @@ tags: [JLS]
 
 - `r`的顺序不在`w`之前（比如，它不是`hb(r, w)`这种情况），并且
 
-- there is no intervening write w' to v (i.e. no write w' to v such that hb(w, w') and hb(w', r)).
-- 没有中间对`v`的写入操作`w'`（比如，没有写入`w'`使得`hb(w, w')`并且hb(w', r)）。
+- 没有中间对`v`的写入操作`w'`（比如，没有写入`w'`使得`hb(w, w')`并且`hb(w', r)`）。
 
-Informally, a read r is allowed to see the result of a write w if there is no happens-before ordering to prevent that read.
+通俗地说，一个读`r`被允许看到一个写`w`的结果，如果没有*happens-before*顺序阻止那个读。
 
-A set of actions A is happens-before consistent if for all reads r in A, where W(r) is the write action seen by r, it is not the case that either hb(r, W(r)) or that there exists a write w in A such that w.v = r.v and hb(W(r), w) and hb(w, r).
+一组操作`A`始终发生在前，如果对A中的所有读`r`，其中`W(r)`是`r`可见的写操作，它不是这种情况：不是`hb(r, W(r))`就是A中存在一个写使得`w.v = r.v`并且`hb(W(r), w)`并且`hb(w, r)`。
 
-In a happens-before consistent set of actions, each read sees a write that it is allowed to see by the happens-before ordering.
+在一组始终发生在前的操作中，每次读取看到的写允许被通过*happens-before*顺序看到。
 
-##### Example 17.4.5-1. Happens-before Consistency
+##### 例子 17.4.5-1. 始终如一的Happens-before
 
-For the trace in Table 17.5, initially A == B == 0. The trace can observe r2 == 0 and r1 == 0 and still be happens-before consistent, since there are execution orders that allow each read to see the appropriate write.
+对于表17.5的跟踪，起初 `A == B == 0`。跟踪可以发现`r2 == 0`并且`r1 == 0`并且仍旧始终如一地发生在前，因为存在执行顺序允许每个读看到相应的写。
 
-##### Table 17.5. Behavior allowed by happens-before consistency, but not sequential consistency.
+##### Table 17.5. `happens-before`一致性允许的行为，而不是顺序一致性
 
 <table class="table table-striped table-bordered" style="width:50%">
     <tr><th>Thread 1</th><th>Thread 2</th></tr>
@@ -274,18 +273,18 @@ For the trace in Table 17.5, initially A == B == 0. The trace can observe r2 == 
     <tr><td>r2 = A;</td><td>r1 = B;</td></tr>
 </table>
 
-*Since there is no synchronization, each read can see either the write of the initial value or the write by the other thread. An execution order that displays this behavior is:*
+*由于不存在同步，每个读都能看到不是初始的写入就是其他线程的写入。显示这个行为的一个执行顺序是：*
 <?prettify linenums=1?>
     B = 1;
     A = 2;
     r2 = A;  // sees initial write of 0
     r1 = B;  // sees initial write of 0
     
-*Another execution order that is happens-before consistent is:*
+*happens-before一致性的另一个执行顺序是：*
 <?prettify linenums=1?>
     r2 = A;  // sees write of A = 2
     r1 = B;  // sees write of B = 1
     B = 1;
     A = 2;
     
-*In this execution, the reads see writes that occur later in the execution order. This may seem counterintuitive, but is allowed by happens-before consistency. Allowing reads to see later writes can sometimes produce unacceptable behaviors.*
+*在这个执行过程中，读看到的写发生在执行顺序的后面。这似乎有驳常理，但是被happens-before一致性允许。允许读取看到后来的写入有时可以产生不可接受的行为。*
