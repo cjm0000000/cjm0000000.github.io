@@ -97,9 +97,10 @@ Paul Jakubik找到一个使用双重检查锁定没有正常工作的例子[A sl
 
 正如你可以看到，对`singletons[i].reference`的赋值比调用`Singleton`的构造器先执行。这在现有的`Java`内存模型下是完全合法的，并且在`C`和`C++`下也是合法的（因为他们都有一个内存模型）。
 
-##### A fix that doesn't work
+##### 不起作用的修复
 
-Given the explanation above, a number of people have suggested the following code:
+鉴于上面的解释，一些人曾建议如下代码：
+
 <?prettify linenums=1?>
     // (Still) Broken multithreaded version
     // "Double-Checked Locking" idiom
@@ -121,19 +122,19 @@ Given the explanation above, a number of people have suggested the following cod
         }
       // other functions and members...
     }
-    
-This code puts construction of the Helper object inside an inner synchronized block. The intuitive idea here is that there should be a memory barrier at the point where synchronization is released, and that should prevent the reordering of the initialization of the Helper object and the assignment to the field helper.
 
-Unfortunately, that intuition is absolutely wrong. The rules for synchronization don't work that way. The rule for a monitorexit (i.e., releasing synchronization) is that actions before the monitorexit must be performed before the monitor is released. However, there is no rule which says that actions after the monitorexit may not be done before the monitor is released. It is perfectly reasonable and legal for the compiler to move the assignment helper = h; inside the synchronized block, in which case we are back where we were previously. Many processors offer instructions that perform this kind of one-way memory barrier. Changing the semantics to require releasing a lock to be a full memory barrier would have performance penalties.
+这段代码把构建`Helper`对象放在内部同步块内。这里直观地想法是，在同步释放点应该有一个内存屏障，并且应该防止`Helper`对象初始化和分配到`helper`字段的重排序。
 
-##### More fixes that don't work
+不幸的是，直觉是完全错误的。同步规则不按这种方式工作的。对于`monitorexit`(比如释放同步)的规则是在`monitorexit`之前的操作必须在`monitor`释放之前执行。但是没有规则说`monitorexit`之后的操作不可以在`monitor`释放之前完成。编译器移动任务`helper = h;`到同步块内部是完全合理和合法的，在这种情况下，我们又回到了之前。许多处理器提供执行这种单向内存屏障的指令。改变语义要求释放锁是一个完整的内存屏障会有性能损失。
 
-There is something you can do to force the writer to perform a full bidirectional memory barrier. This is gross, inefficient, and is almost guaranteed not to work once the Java Memory Model is revised. Do not use this. In the interests of science, [I've put a description of this technique on a separate page](http://www.cs.umd.edu/~pugh/java/memoryModel/BidirectionalMemoryBarrier.html). Do not use it.
+##### 更多不起作用的修复
 
-*However*, even with a full memory barrier being performed by the thread that initializes the helper object, it still doesn't work.
+你可以做一些事情去强制写入（操作）执行一个完整地双向内存屏障。这是严重，效率低下的，而且一旦`Java`内存模型被修改这几乎肯定无法正常工作的。不要使用这个。在科学的利益，[I've put a description of this technique on a separate page](http://www.cs.umd.edu/~pugh/java/memoryModel/BidirectionalMemoryBarrier.html)。不要用它。
 
-The problem is that on some systems, the thread which sees a non-null value for the helper field also needs to perform memory barriers.
+*然而*，即使通过初始化`helper`对象的线程执行一个完整的内存屏障，它仍然无法正常工作。
 
-Why? Because processors have their own locally cached copies of memory. On some processors, unless the processor performs a cache coherence instruction (e.g., a memory barrier), reads can be performed out of stale locally cached copies, even if other processors used memory barriers to force their writes into global memory.
+问题是在某些系统上，看到`helper`字段非空值的线程仍旧需要执行内存屏障。
 
-I've created [a separate web page](http://www.cs.umd.edu/~pugh/java/memoryModel/AlphaReordering.html) with a discussion of how this can actually happen on an Alpha processor.
+为什么？因为处理器有内存在本地缓存的副本。在某些处理器上，除非该处理器执行一个高速缓存一致性的指令（例如，一个内存屏障），否则会读到陈旧的本地缓存副本，即使其他处理器使用内存屏障强制他们写入全局内存。
+
+我已经创建了[一个单独的网页](http://www.cs.umd.edu/~pugh/java/memoryModel/AlphaReordering.html)讨论在一个Alpha处理器这如何能够实际发生。
