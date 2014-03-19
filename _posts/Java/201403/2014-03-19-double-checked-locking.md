@@ -138,3 +138,153 @@ Paul Jakubik找到一个使用双重检查锁定没有正常工作的例子[A sl
 为什么？因为处理器有内存在本地缓存的副本。在某些处理器上，除非该处理器执行一个高速缓存一致性的指令（例如，一个内存屏障），否则会读到陈旧的本地缓存副本，即使其他处理器使用内存屏障强制他们写入全局内存。
 
 我已经创建了[一个单独的网页](http://www.cs.umd.edu/~pugh/java/memoryModel/AlphaReordering.html)讨论在一个Alpha处理器这如何能够实际发生。
+
+#### Is it worth the trouble?
+
+For most applications, the cost of simply making the getHelper() method synchronized is not high. You should only consider this kind of detailed optimizations if you know that it is causing a substantial overhead for an application.
+
+Very often, more high level cleverness, such as using the builtin mergesort rather than handling exchange sort (see the SPECJVM DB benchmark) will have much more impact.
+
+#### Making it work for static singletons
+
+If the singleton you are creating is static (i.e., there will only be one Helper created), as opposed to a property of another object (e.g., there will be one Helper for each Foo object, there is a simple and elegant solution.
+
+Just define the singleton as a static field in a separate class. The semantics of Java guarantee that the field will not be initialized until the field is referenced, and that any thread which accesses the field will see all of the writes resulting from initializing that field.
+<?prettify linenums=1?>
+    class HelperSingleton {
+      static Helper singleton = new Helper();
+    }
+
+#### It will work for 32-bit primitive values
+
+Although the double-checked locking idiom cannot be used for references to objects, it can work for 32-bit primitive values (e.g., int's or float's). Note that it does not work for long's or double's, since unsynchronized reads/writes of 64-bit primitives are not guaranteed to be atomic.
+<?prettify linenums=1?>
+    // Correct Double-Checked Locking for 32-bit primitives
+    class Foo { 
+      private int cachedHashCode = 0;
+      public int hashCode() {
+        int h = cachedHashCode;
+        if (h == 0) 
+        synchronized(this) {
+          if (cachedHashCode != 0) return cachedHashCode;
+          h = computeHashCode();
+          cachedHashCode = h;
+        }
+        return h;
+      }
+      // other functions and members...
+    }
+    
+In fact, assuming that the computeHashCode function always returned the same result and had no side effects (i.e., idempotent), you could even get rid of all of the synchronization.
+<?prettify linenums=1?>
+    // Lazy initialization 32-bit primitives
+    // Thread-safe if computeHashCode is idempotent
+    class Foo { 
+      private int cachedHashCode = 0;
+      public int hashCode() {
+        int h = cachedHashCode;
+        if (h == 0) {
+          h = computeHashCode();
+          cachedHashCode = h;
+        }
+        return h;
+      }
+      // other functions and members...
+    }
+
+#### Making it work with explicit memory barriers
+
+It is possible to make the double checked locking pattern work if you have explicit memory barrier instructions. For example, if you are programming in C++, you can use the code from Doug Schmidt et al.'s book:
+<?prettify linenums=1?>
+    // C++ implementation with explicit memory barriers
+    // Should work on any platform, including DEC Alphas
+    // From "Patterns for Concurrent and Distributed Objects",
+    // by Doug Schmidt
+    template <class TYPE, class LOCK> TYPE *
+    Singleton<TYPE, LOCK>::instance (void) {
+        // First check
+        TYPE* tmp = instance_;
+        // Insert the CPU-specific memory barrier instruction
+        // to synchronize the cache lines on multi-processor.
+        asm ("memoryBarrier");
+        if (tmp == 0) {
+            // Ensure serialization (guard
+            // constructor acquires lock_).
+            Guard<LOCK> guard (lock_);
+            // Double check.
+            tmp = instance_;
+            if (tmp == 0) {
+                tmp = new TYPE;
+                // Insert the CPU-specific memory barrier instruction
+                // to synchronize the cache lines on multi-processor.
+                asm ("memoryBarrier");
+                instance_ = tmp;
+            }
+        return tmp;
+    }
+
+### Fixing Double-Checked Locking using Thread Local Storage
+
+Alexander Terekhov (TEREKHOV@de.ibm.com) came up clever suggestion for implementing double checked locking using thread local storage. Each thread keeps a thread local flag to determine whether that thread has done the required synchronization.
+<?prettify linenums=1?>
+    class Foo {
+	 /** If perThreadInstance.get() returns a non-null value, this thread
+		has done synchronization needed to see initialization
+		of helper */
+         private final ThreadLocal perThreadInstance = new ThreadLocal();
+         private Helper helper = null;
+         public Helper getHelper() {
+             if (perThreadInstance.get() == null) createHelper();
+             return helper;
+         }
+         private final void createHelper() {
+             synchronized(this) {
+                 if (helper == null)
+                     helper = new Helper();
+             }
+	     // Any non-null value would do as the argument here
+             perThreadInstance.set(perThreadInstance);
+         }
+	}
+
+The performance of this technique depends quite a bit on which JDK implementation you have. In Sun's 1.2 implementation, ThreadLocal's were very slow. They are significantly faster in 1.3, and are expected to be faster still in 1.4. [Doug Lea analyzed the performance of some techniques for implementing lazy initialization](http://www.cs.umd.edu/~pugh/java/memoryModel/DCL-performance.html).
+
+### Under the new Java Memory Model
+
+As of JDK5, [there is a new Java Memory Model and Thread specification](http://www.cs.umd.edu/~pugh/java/memoryModel).
+
+#### Fixing Double-Checked Locking using Volatile
+
+JDK5 and later extends the semantics for volatile so that the system will not allow a write of a volatile to be reordered with respect to any previous read or write, and a read of a volatile cannot be reordered with respect to any following read or write. See [this entry in Jeremy Manson's blog](http://jeremymanson.blogspot.com/2008/05/double-checked-locking.html) for more details.
+
+With this change, the Double-Checked Locking idiom can be made to work by declaring the helper field to be volatile. This does not work under JDK4 and earlier.
+<?prettify linenums=1?>
+    // Works with acquire/release semantics for volatile
+    // Broken under current semantics for volatile
+    class Foo {
+        private volatile Helper helper = null;
+        public Helper getHelper() {
+            if (helper == null) {
+                synchronized(this) {
+                    if (helper == null)
+                        helper = new Helper();
+                }
+            }
+            return helper;
+        }
+    }
+
+#### Double-Checked Locking Immutable Objects
+
+If Helper is an immutable object, such that all of the fields of Helper are final, then double-checked locking will work without having to use volatile fields. The idea is that a reference to an immutable object (such as a String or an Integer) should behave in much the same way as an int or float; reading and writing references to immutable objects are atomic.
+
+### Descriptions of double-check idiom
+
+- [Reality Check](http://www.cs.wustl.edu/~schmidt/editorial-3.html), Douglas C. Schmidt, C++ Report, SIGS, Vol. 8, No. 3, March 1996.
+- [Double-Checked Locking: An Optimization Pattern for Efficiently Initializing and Accessing Thread-safe Objects](http://www.cs.wustl.edu/~schmidt/DC-Locking.ps.gz), Douglas Schmidt and Tim Harrison. 3rd annual Pattern Languages of Program Design conference, 1996
+- [Lazy instantiation](http://www.javaworld.com/javaworld/javatips/jw-javatip67.html), Philip Bishop and Nigel Warren, JavaWorld Magazine
+- [Programming Java threads in the real world, Part 7](http://www.javaworld.com/javaworld/jw-04-1999/jw-04-toolbox-3.html), Allen Holub, Javaworld Magazine, April 1999.
+- [Java 2 Performance and Idiom Guide](http://www.phptr.com/ptrbooks/ptr_0130142603.html), Craig Larman and Rhett Guthrie, p100.
+- [Java in Practice: Design Styles and Idioms for Effective Java](http://www.google.com/search?q=Java+Design+Styles+Nigel+Bishop), Nigel Warren and Philip Bishop, p142.
+- Rule 99, [The Elements of Java Style](http://www.google.com/search?q=elements+java+style+Ambler), Allan Vermeulen, Scott Ambler, Greg Bumgardner, Eldon Metz, Trvor Misfeldt, Jim Shur, Patrick Thompson, SIGS Reference library
+- [Global Variables in Java with the Singleton Pattern](http://gamelan.earthweb.com/journal/techfocus/022300_singleton.html), Wiebe de Jong, Gamelan
