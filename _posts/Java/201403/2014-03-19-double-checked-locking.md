@@ -249,15 +249,15 @@ Alexander Terekhov (TEREKHOV@de.ibm.com)提出了巧妙的建议，使用线程�
 
 这种技术的性能相当多取决于你的`JDK`实现。`ThreadLocal`在Sun的`1.2`实现里是很慢的。`1.3`中显著变快，并预期`1.4`中还要更快。[Doug Lea analyzed the performance of some techniques for implementing lazy initialization](http://www.cs.umd.edu/~pugh/java/memoryModel/DCL-performance.html)。
 
-### Under the new Java Memory Model
+### 在新的Java内存模型
 
-As of JDK5, [there is a new Java Memory Model and Thread specification](http://www.cs.umd.edu/~pugh/java/memoryModel).
+如同`JDK5`，[有一个新的Java内存模型和线程规格](http://www.cs.umd.edu/~pugh/java/memoryModel)。
 
-#### Fixing Double-Checked Locking using Volatile
+#### 使用`volatile`修复双重检查锁定
 
-JDK5 and later extends the semantics for volatile so that the system will not allow a write of a volatile to be reordered with respect to any previous read or write, and a read of a volatile cannot be reordered with respect to any following read or write. See [this entry in Jeremy Manson's blog](http://jeremymanson.blogspot.com/2008/05/double-checked-locking.html) for more details.
+`JDK5`和更高版本扩展了`volatile`的语义，从而使系统将不允许`volatile`写相对于之前的任何读或写被重新排序，并且`volatile`读不能相对于任何随后的读或写重新排序。参见[Jeremy Manson的博客中该条目](http://jeremymanson.blogspot.com/2008/05/double-checked-locking.html)了解更多详情。
 
-With this change, the Double-Checked Locking idiom can be made to work by declaring the helper field to be volatile. This does not work under JDK4 and earlier.
+随着这种变化，通过声明`helper`字段为`volatile`，双重检查锁定习语可以工作。这在`JDK4`或者更早版本下不能工作。
 <?prettify linenums=1?>
     // Works with acquire/release semantics for volatile
     // Broken under current semantics for volatile
@@ -274,11 +274,11 @@ With this change, the Double-Checked Locking idiom can be made to work by declar
         }
     }
 
-#### Double-Checked Locking Immutable Objects
+#### 双检锁不可变对象
 
-If Helper is an immutable object, such that all of the fields of Helper are final, then double-checked locking will work without having to use volatile fields. The idea is that a reference to an immutable object (such as a String or an Integer) should behave in much the same way as an int or float; reading and writing references to immutable objects are atomic.
+如果`Helper`是一个不可变对象，使得`Helper`的所有字段都是`final`的，那么双重检测锁定将会工作而不必使用`volatile`字段。这个想法是，引用一个不可变的对象（比如一个`String`对象或一个`Integer`对象）应该表现出和`int`或者`float`几乎相同的方式；读写不可变对象的引用是原子的。
 
-### Descriptions of double-check idiom
+### 双重检测习语的描述
 
 - [Reality Check](http://www.cs.wustl.edu/~schmidt/editorial-3.html), Douglas C. Schmidt, C++ Report, SIGS, Vol. 8, No. 3, March 1996.
 - [Double-Checked Locking: An Optimization Pattern for Efficiently Initializing and Accessing Thread-safe Objects](http://www.cs.wustl.edu/~schmidt/DC-Locking.ps.gz), Douglas Schmidt and Tim Harrison. 3rd annual Pattern Languages of Program Design conference, 1996
