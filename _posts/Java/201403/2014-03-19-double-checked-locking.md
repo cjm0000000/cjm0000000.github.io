@@ -139,25 +139,25 @@ Paul Jakubik找到一个使用双重检查锁定没有正常工作的例子[A sl
 
 我已经创建了[一个单独的网页](http://www.cs.umd.edu/~pugh/java/memoryModel/AlphaReordering.html)讨论在一个Alpha处理器这如何能够实际发生。
 
-#### Is it worth the trouble?
+#### 是否得不偿失？
 
-For most applications, the cost of simply making the getHelper() method synchronized is not high. You should only consider this kind of detailed optimizations if you know that it is causing a substantial overhead for an application.
+对于大多数的应用来说，简单的使`getHelper()`方法同步的成本并不高。你应该考虑这种详细的优化仅在如果你知道这在一个应用中造成大量开销。
 
-Very often, more high level cleverness, such as using the builtin mergesort rather than handling exchange sort (see the SPECJVM DB benchmark) will have much more impact.
+很多时候，更高层次的小聪明，比如使用内置的归并排序而不是处理交换排序（见`SPECJVM DB`基准）将有更多的影响。
 
-#### Making it work for static singletons
+#### 使它适合静态单例
 
-If the singleton you are creating is static (i.e., there will only be one Helper created), as opposed to a property of another object (e.g., there will be one Helper for each Foo object, there is a simple and elegant solution.
+如果你创建的单例是静态的（比如，也只会创建一个`Helper`），相对于另一个对象的属性（比如，每个`Foo`对象将只有一个`Helper`），有一个简单而优雅的解决方案。
 
-Just define the singleton as a static field in a separate class. The semantics of Java guarantee that the field will not be initialized until the field is referenced, and that any thread which accesses the field will see all of the writes resulting from initializing that field.
+只要在一个单独的类定义`singleton`为一个静态字段。`Java`的语义保证该字段不会被初始化，直到字段被引用，并且访问该字段的所有线程都会看到所有初始化那个字段造成的写入。
 <?prettify linenums=1?>
     class HelperSingleton {
       static Helper singleton = new Helper();
     }
 
-#### It will work for 32-bit primitive values
+#### 这将适用于32位的原始值
 
-Although the double-checked locking idiom cannot be used for references to objects, it can work for 32-bit primitive values (e.g., int's or float's). Note that it does not work for long's or double's, since unsynchronized reads/writes of 64-bit primitives are not guaranteed to be atomic.
+虽然双重锁定检查习语不能用于对对象的引用，它可以为32位基本类型值工作（例如，`int`的或者`float`的）。需要注意的是`long`或者`double`不起作用，因为非同步读/写64位基本类型不能保证原子性。
 <?prettify linenums=1?>
     // Correct Double-Checked Locking for 32-bit primitives
     class Foo { 
@@ -174,8 +174,8 @@ Although the double-checked locking idiom cannot be used for references to objec
       }
       // other functions and members...
     }
-    
-In fact, assuming that the computeHashCode function always returned the same result and had no side effects (i.e., idempotent), you could even get rid of all of the synchronization.
+
+事实上，假设`computeHashCode`函数总是返回相同的结果并且不会产生副作用（即幂等）,你甚至可以去掉所有同步。
 <?prettify linenums=1?>
     // Lazy initialization 32-bit primitives
     // Thread-safe if computeHashCode is idempotent
@@ -192,9 +192,9 @@ In fact, assuming that the computeHashCode function always returned the same res
       // other functions and members...
     }
 
-#### Making it work with explicit memory barriers
+#### 通过显示内存栅栏使其工作
 
-It is possible to make the double checked locking pattern work if you have explicit memory barrier instructions. For example, if you are programming in C++, you can use the code from Doug Schmidt et al.'s book:
+如果你有明确的内存屏障指令，使双重检查锁定模式工作是可能的。例如，如果你用`C++`编程，你可以使用来自道格·施密特等人书中的代码：
 <?prettify linenums=1?>
     // C++ implementation with explicit memory barriers
     // Should work on any platform, including DEC Alphas
@@ -223,9 +223,9 @@ It is possible to make the double checked locking pattern work if you have expli
         return tmp;
     }
 
-### Fixing Double-Checked Locking using Thread Local Storage
+### 使用线程本地存储修复双重检查锁定
 
-Alexander Terekhov (TEREKHOV@de.ibm.com) came up clever suggestion for implementing double checked locking using thread local storage. Each thread keeps a thread local flag to determine whether that thread has done the required synchronization.
+Alexander Terekhov (TEREKHOV@de.ibm.com)提出了巧妙的建议，使用线程本地存储实现双重检查锁定。每个线程都保持一个线程的本地标志来确定线程是否做了必要的同步。
 <?prettify linenums=1?>
     class Foo {
 	 /** If perThreadInstance.get() returns a non-null value, this thread
@@ -247,7 +247,7 @@ Alexander Terekhov (TEREKHOV@de.ibm.com) came up clever suggestion for implement
          }
 	}
 
-The performance of this technique depends quite a bit on which JDK implementation you have. In Sun's 1.2 implementation, ThreadLocal's were very slow. They are significantly faster in 1.3, and are expected to be faster still in 1.4. [Doug Lea analyzed the performance of some techniques for implementing lazy initialization](http://www.cs.umd.edu/~pugh/java/memoryModel/DCL-performance.html).
+这种技术的性能相当多取决于你的`JDK`实现。`ThreadLocal`在Sun的`1.2`实现里是很慢的。`1.3`中显著变快，并预期`1.4`中还要更快。[Doug Lea analyzed the performance of some techniques for implementing lazy initialization](http://www.cs.umd.edu/~pugh/java/memoryModel/DCL-performance.html)。
 
 ### Under the new Java Memory Model
 
