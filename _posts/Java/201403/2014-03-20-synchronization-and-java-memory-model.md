@@ -35,13 +35,13 @@ tags: [JMM]
 
 - 处理器也可以重新排列对应于语句的机器指令的执行顺序，或者甚至同时执行它们。
 
-- The memory system (as governed by cache control units) may rearrange the order in which writes are committed to memory cells corresponding to the variables. These writes may overlap with other computations and memory actions.
+- 内存系统可以重新排列提交到变量对应的内存单元的写入顺序。这些写入操作可能会和其他的计算或内存操作重叠。
 
-- The compiler, processor, and/or memory system may interleave the machine-level effects of the two statements. For example on a 32-bit machine, the high-order word of b may be written first, followed by the write to a, followed by the write to the low-order word of b.
+- 编译器，处理器和/或内存系统可能交织地在机器级别影响两个语句。例如一个32位机器上，`b`的高位字可以先写，然后写入`a`，然后写`b`的低位字。
 
-- The compiler, processor, and/or memory system may cause the memory cells representing the variables not to be updated until sometime after (if ever) a subsequent check is called, but instead to maintain the corresponding values (for example in CPU registers) in such a way that the code still has the intended effect.
+- 编译器，处理器和/或内存系统可能导致变量对应的内存单元不被更新，直到一段时间后（如果有的话）调用后续的检查，而是保持相应的值（例如在`CPU`的寄存器）这样一种方式，该代码任然有预期的效果。
 
-In a sequential language, none of this can matter so long as program execution obeys as-if-serial semantics. Sequential programs cannot depend on the internal processing details of statements within simple code blocks, so they are free to be manipulated in all these ways. This provides essential flexibility for compilers and machines. Exploitation of such opportunities (via pipelined superscalar CPUs, multilevel caches, load/store balancing, interprocedural register allocation, and so on) is responsible for a significant amount of the massive improvements in execution speed seen in computing over the past decade. The as-if-serial property of these manipulations shields sequential programmers from needing to know if or how they take place. Programmers who never create their own threads are almost never impacted by these issues.
+在顺序语言，这一切都没问题，只要程序的执行服从`as-if-serial`语义。顺序执行的程序不能依赖于简单代码块语句的内部处理细节，所以他们可以自由地在所有这些方式进行操作。这为编译器和机器提供了必不可少的灵活性。利用这样的机会（通过流水线超标量处理器，多级高速缓存，加载/存储平衡，过程间寄存器分配等等）是可靠的，对于在过去十年的计算中看到的执行速度的大量的巨大改进。这些操作的`as-if-serial`属性屏蔽顺序程序员不需要知道它们如何发生。没有创建自己的线程的程序员几乎从未被这些问题影响。
 
 Things are different in concurrent programming. Here, it is entirely possible for check to be called in one thread while set is being executed in another, in which case the check might be "spying" on the optimized execution of set. And if any of the above manipulations occur, it is possible for check to return false. For example, as detailed below, check could read a value for the long b that is neither 0 nor -1, but instead a half-written in-between value. Also, out-of-order execution of the statements in set may cause check to read b as -1 but then read a as still 0.
 
