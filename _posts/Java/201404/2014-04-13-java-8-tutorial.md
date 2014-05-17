@@ -40,3 +40,38 @@ Java 8 使我们能够利用`default`关键字添加非抽象方法实现到接�
 	formula.sqrt(16);           // 4.0
 
 formula作为一个匿名对象实现。代码是相当冗长：这样一个简单的`sqrt(a * 100)`计算需要6行代码。正如我们将在下一节看到的，在Java 8中有更好的方式实现单一方法的对象。
+
+### Lambda 表达式
+
+让我们从一个关于在Java的先前版本中如何将一个字符串列表排序的简单例子开始:
+
+<?prettify linenums=1?>
+	List<String> names = Arrays.asList("peter", "anna", "mike", "xenia");
+
+	Collections.sort(names, new Comparator<String>() {
+		@Override
+		public int compare(String a, String b) {
+			return b.compareTo(a);
+		}
+	});
+
+静态工具方法`Collections.sort`接受一个列表和一个比较器以便对给定的列表中的元素排序。你经常会发现自己创建匿名比较器并且将他们传递给排序方法。
+
+Java 8配备了更短的语法，**lambda表达式**，取代成天创建匿名对象：
+
+<?prettify linenums=1?>
+	Collections.sort(names, (String a, String b) -> {
+		return b.compareTo(a);
+	});
+	
+正如你所看到的，代码更短，更易于阅读。但它可以更短：
+
+<?prettify?>
+	Collections.sort(names, (String a, String b) -> b.compareTo(a));
+
+对于一行的方法体可以跳过这两个大括号{}和return关键字。但它可以更短：
+
+<?prettify?>
+	Collections.sort(names, (a, b) -> b.compareTo(a));
+
+Java编译器是知道参数类型的，所以你可以跳过它们。让我们更深入地研究lambda表达式如何在自然环境下使用。
