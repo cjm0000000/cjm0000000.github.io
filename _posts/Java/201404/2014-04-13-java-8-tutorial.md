@@ -75,3 +75,79 @@ Java 8配备了更短的语法，**lambda表达式**，取代成天创建匿名�
 	Collections.sort(names, (a, b) -> b.compareTo(a));
 
 Java编译器是知道参数类型的，所以你可以跳过它们。让我们更深入地研究lambda表达式如何在自然环境下使用。
+
+### Functional Interfaces
+
+How does lambda expressions fit into Javas type system? Each lambda corresponds to a given type, specified by an interface. A so called functional interface must contain **exactly one abstract method** declaration. Each lambda expression of that type will be matched to this abstract method. Since default methods are not abstract you're free to add default methods to your functional interface.
+
+We can use arbitrary interfaces as lambda expressions as long as the interface only contains one abstract method. To ensure that your interface meet the requirements, you should add the `@FunctionalInterface` annotation. The compiler is aware of this annotation and throws a compiler error as soon as you try to add a second abstract method declaration to the interface.
+
+Example:
+
+    <?prettify linenums=1?>
+    @FunctionalInterface
+    interface Converter<F, T> {
+        T convert(F from);
+    }
+
+
+    <?prettify linenums=1?>
+    Converter<String, Integer> converter = (from) -> Integer.valueOf(from);
+    Integer converted = converter.convert("123");
+    System.out.println(converted);    // 123
+    
+Keep in mind that the code is also valid if the @FunctionalInterface annotation would be ommited.
+
+### Method and Constructor References
+
+The above example code can be further simplified by utilizing static method references:
+
+    <?prettify linenums=1?>
+    Converter<String, Integer> converter = Integer::valueOf;
+    Integer converted = converter.convert("123");
+    System.out.println(converted);   // 123
+    
+ava 8 enables you to pass references of methods or constructors via the :: keyword. The above example shows how to reference a static method. But we can also reference object methods:
+
+    <?prettify linenums=1?>
+    class Something {
+        String startsWith(String s) {
+            return String.valueOf(s.charAt(0));
+        }
+    }
+    
+    <?prettify linenums=1?>
+    Something something = new Something();
+    Converter<String, String> converter = something::startsWith;
+    String converted = converter.convert("Java");
+    System.out.println(converted);    // "J"
+    
+Let's see how the `::` keyword works for constructors. First we define an example bean with different constructors:
+
+    <?prettify linenums=1?>
+    class Person {
+        String firstName;
+        String lastName;
+
+        Person() {}
+
+        Person(String firstName, String lastName) {
+            this.firstName = firstName;
+            this.lastName = lastName;
+        }
+    }
+    
+Next we specify a person factory interface to be used for creating new persons:
+
+    <?prettify linenums=1?>
+    interface PersonFactory<P extends Person> {
+        P create(String firstName, String lastName);
+    }
+    
+Instead of implementing the factory manually, we glue everything together via constructor references:
+
+    <?prettify linenums=1?>
+    PersonFactory<Person> personFactory = Person::new;
+    Person person = personFactory.create("Peter", "Parker");
+
+We create a reference to the Person constructor via `Person::new`. The Java compiler automatically chooses the right constructor by matching the signature of `PersonFactory.create`.
