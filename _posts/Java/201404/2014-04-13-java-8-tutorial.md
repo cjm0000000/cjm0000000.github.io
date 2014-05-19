@@ -76,13 +76,13 @@ Java 8配备了更短的语法，**lambda表达式**，取代成天创建匿名�
 
 Java编译器是知道参数类型的，所以你可以跳过它们。让我们更深入地研究lambda表达式如何在自然环境下使用。
 
-### Functional Interfaces
+### 功能接口
 
-How does lambda expressions fit into Javas type system? Each lambda corresponds to a given type, specified by an interface. A so called functional interface must contain **exactly one abstract method** declaration. Each lambda expression of that type will be matched to this abstract method. Since default methods are not abstract you're free to add default methods to your functional interface.
+lambda表达式是如何融入Java的类型系统的？每个lambda对应于一个由接口指定的类型。所谓的功能接口必须**只包含一个抽象方法**声明。该类型的每个lambda表达式将被匹配到这个抽象方法。由于**default**方法不是抽象的，你可以自由地添加**default**方法到你的功能接口。
 
-We can use arbitrary interfaces as lambda expressions as long as the interface only contains one abstract method. To ensure that your interface meet the requirements, you should add the `@FunctionalInterface` annotation. The compiler is aware of this annotation and throws a compiler error as soon as you try to add a second abstract method declaration to the interface.
+我们可以使用任意的接口作为lambda表达式，只要该接口只包含一个抽象方法。为了确保你的接口满足要求，你应该添加`@FunctionalInterface`注解。编译器知道此注解，一旦你尝试添加第二个抽象方法声明到这个接口，会抛出一个编译错误。
 
-Example:
+例子:
 
     <?prettify linenums=1?>
     @FunctionalInterface
@@ -95,8 +95,8 @@ Example:
     Converter<String, Integer> converter = (from) -> Integer.valueOf(from);
     Integer converted = converter.convert("123");
     System.out.println(converted);    // 123
-    
-Keep in mind that the code is also valid if the @FunctionalInterface annotation would be ommited.
+
+记住如果@FunctionalInterface注解被忽略了，代码还是有效的。
 
 ### Method and Constructor References
 
