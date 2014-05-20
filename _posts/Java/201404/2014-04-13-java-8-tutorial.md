@@ -98,16 +98,16 @@ lambda表达式是如何融入Java的类型系统的？每个lambda对应于一�
 
 记住如果@FunctionalInterface注解被忽略了，代码还是有效的。
 
-### Method and Constructor References
+### 方法和构造器引用
 
-The above example code can be further simplified by utilizing static method references:
+上面的示例代码可以利用静态方法引用进一步简化：
 
     <?prettify linenums=1?>
     Converter<String, Integer> converter = Integer::valueOf;
     Integer converted = converter.convert("123");
     System.out.println(converted);   // 123
-    
-ava 8 enables you to pass references of methods or constructors via the :: keyword. The above example shows how to reference a static method. But we can also reference object methods:
+
+Java 8使你能够通过`::`关键字传递方法或者构造器的引用。上面的例子演示了如何引用一个静态方法。但是我们也可以引用对象的方法：
 
     <?prettify linenums=1?>
     class Something {
@@ -121,8 +121,8 @@ ava 8 enables you to pass references of methods or constructors via the :: keywo
     Converter<String, String> converter = something::startsWith;
     String converted = converter.convert("Java");
     System.out.println(converted);    // "J"
-    
-Let's see how the `::` keyword works for constructors. First we define an example bean with different constructors:
+
+让我们看看`::`关键字是如何为构造器工作的。首先我们用不同构造器定义一个例子bean：
 
     <?prettify linenums=1?>
     class Person {
@@ -136,18 +136,18 @@ Let's see how the `::` keyword works for constructors. First we define an exampl
             this.lastName = lastName;
         }
     }
-    
-Next we specify a person factory interface to be used for creating new persons:
+
+接下去我们指定一个person工厂用于创建新的人：
 
     <?prettify linenums=1?>
     interface PersonFactory<P extends Person> {
         P create(String firstName, String lastName);
     }
-    
-Instead of implementing the factory manually, we glue everything together via constructor references:
+
+我们通过构造器引用把所有的事情胶合起来，取代手工实现工厂：
 
     <?prettify linenums=1?>
     PersonFactory<Person> personFactory = Person::new;
     Person person = personFactory.create("Peter", "Parker");
 
-We create a reference to the Person constructor via `Person::new`. The Java compiler automatically chooses the right constructor by matching the signature of `PersonFactory.create`.
+我们通过`Person::new`创建了一个到Person构造器的引用。Java编译器会自动匹配`PersonFactory.create`的签名选择合适的构造器。
