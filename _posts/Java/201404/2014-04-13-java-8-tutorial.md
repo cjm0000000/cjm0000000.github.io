@@ -7,6 +7,7 @@ tags: [Tutorial]
 ---
 {% include JB/setup %}
 本文译自[Java 8 Tutorial](http://winterbe.com/posts/2014/03/16/java-8-tutorial/)。
+
 <?prettify ?>
 	“Java还是没有死去——人们开始明白这一点。”
 
@@ -17,14 +18,15 @@ tags: [Tutorial]
 ### 接口的默认方法
 
 Java 8 使我们能够利用`default`关键字添加非抽象方法实现到接口中。此功能也称为**扩展方法**。这是我们的第一个例子：
-<?prettify linenums=1?>
-	interface Formula {
-		double calculate(int a);
 
-		default double sqrt(int a) {
-			return Math.sqrt(a);
-		}
-	}
+    <?prettify linenums=1?>
+    interface Formula {
+        double calculate(int a);
+
+        default double sqrt(int a) {
+            return Math.sqrt(a);
+        }
+    }
 
 除了抽象方法`calculate`，接口`Formula`也定义了默认方法`sqrt`。具体的类只需要实现抽象方法`calculate`。默认方法`sqrt`可以使用现成的。
 
