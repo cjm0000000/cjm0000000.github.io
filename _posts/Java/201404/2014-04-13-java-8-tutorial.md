@@ -153,36 +153,36 @@ Java 8使你能够通过`::`关键字传递方法或者构造器的引用。上�
 
 我们通过`Person::new`创建了一个到Person构造器的引用。Java编译器会自动匹配`PersonFactory.create`的签名选择合适的构造器。
 
-### Lambda Scopes
+### Lambda作用域
 
-Accessing outer scope variables from lambda expressions is very similar to anonymous objects. You can access final variables from the local outer scope as well as instance fields and static variables.
+从lambda表达式访问外部变量的作用域和匿名对象很相似。你可以从局部外部作用域以及实例字段和静态变量访问final变量。
 
-#### Accessing local variables
+#### 访问局部变量
 
-We can read final local variables from the outer scope of lambda expressions:
+我们可以从lambda表达式的外部作用域读取final局部变量：
 
 <?prettify linenums=1?>
     inal int num = 1;
     Converter<Integer, String> stringConverter = (from) -> String.valueOf(from + num);
 
     stringConverter.convert(2);     // 3
-    
-ut different to anonymous objects the variable num does not have to be declared final. This code is also valid:
+
+但是和匿名对象不同的是num变量不需要声明成final。这个代码也是有效的：
 
 <?prettify linenums=1?>
     int num = 1;
     Converter<Integer, String> stringConverter = (from) -> String.valueOf(from + num);
 
     stringConverter.convert(2);     // 3
-    
-However `num` must be implicitly final for the code to compile. The following code does **not** compile:
+
+然而为了让代码通过编译，`num`变量必须被隐式声明为final。下面的代码**不能**编译：
 
 <?prettify linenums=1?>
     int num = 1;
     Converter<Integer, String> stringConverter = (from) -> String.valueOf(from + num);
     num = 3;
-    
-Writing to `num` from within the lambda expression is also prohibited.
+
+从lambda表达式内部写入`num`也被禁止。
 
 #### Accessing fields and static variables
 
