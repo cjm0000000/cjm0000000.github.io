@@ -263,9 +263,9 @@ Consumers表示要在单一输入参数中执行操作。
     Consumer<Person> greeter = (p) -> System.out.println("Hello, " + p.firstName);
     greeter.accept(new Person("Luke", "Skywalker"));
     
-#### Comparators
+#### Comparator接口
 
-Comparators are well known from older versions of Java. Java 8 adds various default methods to the interface.
+Comparators在老版本Java中众所周知。Java 8添加许多默认方法到这个接口。
 
 <?prettify linenums=1?>
     Comparator<Person> comparator = (p1, p2) -> p1.firstName.compareTo(p2.firstName);
@@ -276,11 +276,11 @@ Comparators are well known from older versions of Java. Java 8 adds various defa
     comparator.compare(p1, p2);             // > 0
     comparator.reversed().compare(p1, p2);  // < 0
     
-#### Optionals
+#### Optional接口
 
-Optionals are not functional interfaces, instead it's a nifty utility to prevent `NullPointerException`. It's an important concept for the next section, so let's have a quick look at how Optionals work.
+Optionals不是功能接口，相反，它是防止`NullPointerException`异常的极好工具。它是下一个部分的重要概念，所以让我们快速浏览下Optional是如何工作的。
 
-Optional is a simple container for a value which may be null or non-null. Think of a method which may return a non-null result but sometimes return nothing. Instead of returning `null` you return an `Optional` in Java 8.
+Optional是一个存放一个值的简单容器，它可以为空或者不为空。想象一个方法，它可能返回一个非空结果，但是有时什么都不返回。在Java 8中你可以返回一个`Optional`而不是返回`null`。
 
 <?prettify linenums=1?>
     Optional<String> optional = Optional.of("bam");
