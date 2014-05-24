@@ -290,3 +290,218 @@ Optional是一个存放一个值的简单容器，它可以为空或者不为空
     optional.orElse("fallback");    // "bam"
 
     optional.ifPresent((s) -> System.out.println(s.charAt(0)));     // "b"
+
+### Streams
+
+A `java.util.Stream` represents a sequence of elements on which one or more operations can be performed. Stream operations are either _intermediate_ or _terminal_. While terminal operations return a result of a certain type, intermediate operations return the stream itself so you can chain multiple method calls in a row. Streams are created on a source, e.g. a `java.util.Collection` like lists or sets (maps are not supported). Stream operations can either be executed sequential or parallel.
+
+Let's first look how sequential streams work. First we create a sample source in form of a list of strings:
+
+<?prettify linenums=1?>
+    List<String> stringCollection = new ArrayList<>();
+    stringCollection.add("ddd2");
+    stringCollection.add("aaa2");
+    stringCollection.add("bbb1");
+    stringCollection.add("aaa1");
+    stringCollection.add("bbb3");
+    stringCollection.add("ccc");
+    stringCollection.add("bbb2");
+    stringCollection.add("ddd1");
+    
+Collections in Java 8 are extended so you can simply create streams either by calling `Collection.stream()` or `Collection.parallelStream()`. The following sections explain the most common stream operations.
+
+#### Filter
+
+Filter accepts a predicate to filter all elements of the stream. This operation is _intermediate_ which enables us to call another stream operation (`forEach`) on the result. ForEach accepts a consumer to be executed for each element in the filtered stream. ForEach is a terminal operation. It's `void`, so we cannot call another stream operation.
+
+<?prettify linenums=1?>
+    stringCollection
+        .stream()
+        .filter((s) -> s.startsWith("a"))
+        .forEach(System.out::println);
+
+    // "aaa2", "aaa1"
+
+#### Sorted
+
+Sorted is an _intermediate_ operation which returns a sorted view of the stream. The elements are sorted in natural order unless you pass a custom `Comparator`.
+
+<?prettify linenums=1?>
+    stringCollection
+        .stream()
+        .sorted()
+        .filter((s) -> s.startsWith("a"))
+        .forEach(System.out::println);
+
+    // "aaa1", "aaa2"
+
+Keep in mind that `sorted` does only create a sorted view of the stream without manipulating the ordering of the backed collection. The ordering of `stringCollection` is untouched:
+
+<?prettify?>
+    System.out.println(stringCollection);
+    // ddd2, aaa2, bbb1, aaa1, bbb3, ccc, bbb2, ddd1
+
+#### Map
+
+The _intermediate_ operation `map` converts each element into another object via the given function. The following example converts each string into an upper-cased string. But you can also use `map` to transform each object into another type. The generic type of the resulting stream depends on the generic type of the function you pass to `map`.
+
+<?prettify linenums=1?>
+    stringCollection
+        .stream()
+        .map(String::toUpperCase)
+        .sorted((a, b) -> b.compareTo(a))
+        .forEach(System.out::println);
+
+    // "DDD2", "DDD1", "CCC", "BBB3", "BBB2", "AAA2", "AAA1"
+
+#### Match
+
+Various matching operations can be used to check whether a certain predicate matches the stream. All of those operations are terminal and return a boolean result.
+
+<?prettify linenums=1?>
+    boolean anyStartsWithA = stringCollection.stream()
+            .anyMatch((s) -> s.startsWith("a"));
+
+    System.out.println(anyStartsWithA);      // true
+
+    boolean allStartsWithA = stringCollection.stream()
+            .allMatch((s) -> s.startsWith("a"));
+
+    System.out.println(allStartsWithA);      // false
+
+    boolean noneStartsWithZ = stringCollection.stream()
+            .noneMatch((s) -> s.startsWith("z"));
+
+    System.out.println(noneStartsWithZ);      // true
+
+#### Count
+
+Count is a _terminal_ operation returning the number of elements in the stream as a `long`.
+
+<?prettify linenums=1?>
+    long startsWithB =
+        stringCollection
+            .stream()
+            .filter((s) -> s.startsWith("b"))
+            .count();
+
+    System.out.println(startsWithB);    // 3
+
+#### Reduce
+
+This _terminal_ operation performs a reduction on the elements of the stream with the given function. The result is an `Optional` holding the reduced value.
+
+<?prettify linenums=1?>
+    Optional<String> reduced =
+        stringCollection
+            .stream()
+            .sorted()
+            .reduce((s1, s2) -> s1 + "#" + s2);
+
+    reduced.ifPresent(System.out::println);
+    // "aaa1#aaa2#bbb1#bbb2#bbb3#ccc#ddd1#ddd2"
+
+### Parallel Streams
+
+As mentioned above streams can be either sequential or parallel. Operations on sequential streams are performed on a single thread while operations on parallel streams are performed concurrent on multiple threads.
+
+The following example demonstrates how easy it is to increase the performance by using parallel streams.
+
+First we create a large list of unique elements:
+
+<?prettify linenums=1?>
+    int max = 1000000;
+    List<String> values = new ArrayList<>(max);
+    for (int i = 0; i < max; i++) {
+        UUID uuid = UUID.randomUUID();
+        values.add(uuid.toString());
+    }
+
+Now we measure the time it takes to sort a stream of this collection.
+
+#### Sequential Sort
+
+<?prettify linenums=1?>
+    long t0 = System.nanoTime();
+
+    long count = values.stream().sorted().count();
+    System.out.println(count);
+
+    long t1 = System.nanoTime();
+
+    long millis = TimeUnit.NANOSECONDS.toMillis(t1 - t0);
+    System.out.println(String.format("sequential sort took: %d ms", millis));
+
+    // sequential sort took: 899 ms
+
+#### Parallel Sort
+
+<?prettify linenums=1?>
+    long t0 = System.nanoTime();
+
+    long count = values.parallelStream().sorted().count();
+    System.out.println(count);
+
+    long t1 = System.nanoTime();
+
+    long millis = TimeUnit.NANOSECONDS.toMillis(t1 - t0);
+    System.out.println(String.format("parallel sort took: %d ms", millis));
+
+    // parallel sort took: 472 ms
+
+As you can see both code snippets are almost identical but the parallel sort is roughly 50% faster. All you have to do is change `stream()` to `parallelStream()`.
+
+### Map
+
+As already mentioned maps don't support streams. Instead maps now support various new and useful methods for doing common tasks.
+
+<?prettify linenums=1?>
+    Map<Integer, String> map = new HashMap<>();
+
+    for (int i = 0; i < 10; i++) {
+        map.putIfAbsent(i, "val" + i);
+    }
+
+    map.forEach((id, val) -> System.out.println(val));
+
+The above code should be self-explaining: `putIfAbsent` prevents us from writing additional if null checks; `forEach` accepts a consumer to perform operations for each value of the map.
+
+This example shows how to compute code on the map by utilizing functions:
+
+<?prettify linenums=1?>
+    map.computeIfPresent(3, (num, val) -> val + num);
+    map.get(3);             // val33
+
+    map.computeIfPresent(9, (num, val) -> null);
+    map.containsKey(9);     // false
+
+    map.computeIfAbsent(23, num -> "val" + num);
+    map.containsKey(23);    // true
+
+    map.computeIfAbsent(3, num -> "bam");
+    map.get(3);             // val33
+
+Next, we learn how to remove entries for a a given key, only if it's currently mapped to a given value:
+
+<?prettify linenums=1?>
+    map.remove(3, "val3");
+    map.get(3);             // val33
+
+    map.remove(3, "val33");
+    map.get(3);             // null
+
+Another helpful method:
+
+<?prettify?>
+    map.getOrDefault(42, "not found");  // not found
+
+Merging entries of a map is quite easy:
+
+<?prettify linenums=1?>
+    map.merge(9, "val9", (value, newValue) -> value.concat(newValue));
+    map.get(9);             // val9
+
+    map.merge(9, "concat", (value, newValue) -> value.concat(newValue));
+    map.get(9);             // val9concat
+
+Merge either put the key/value into the map if no entry for the key exists, or the merging function will be called to change the existing value.
