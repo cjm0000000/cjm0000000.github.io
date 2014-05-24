@@ -184,9 +184,9 @@ Java 8使你能够通过`::`关键字传递方法或者构造器的引用。上�
 
 从lambda表达式内部写入`num`也被禁止。
 
-#### Accessing fields and static variables
+#### 访问字段和静态变量
 
-In constrast to local variables we have both read and write access to instance fields and static variables from within lambda expressions. This behaviour is well known from anonymous objects.
+和局部变量相比，我们都能从lambda表达式内部读写访问实例字段和静态变量。此行为在匿名对象中众所周知。
 
 <?prettify linenums=1?>
     class Lambda4 {
@@ -206,24 +206,24 @@ In constrast to local variables we have both read and write access to instance f
         }
     }
     
-#### Accessing Default Interface Methods
+#### 访问默认接口方法
 
-Remember the formula example from the first section? Interface `Formula` defines a default method `sqrt` which can be accessed from each formula instance including anonymous objects. This does not work with lambda expressions.
+还记得第一部分的formula例子吗？`Formula`接口定义了一个`sqrt`方法，它可以从formula的每个实例包括匿名对象来访问。这在lambda表达式中行不通。
 
-Default methods **cannot** be accessed from within lambda expressions. The following code does not compile:
+默认方法**不能**从lambda表达式中访问。下面的代码无法编译：
 
 <?prettify?>
     Formula formula = (a) -> sqrt( a * 100);
     
-### Built-in Functional Interfaces
+### 内置功能接口
 
-The JDK 1.8 API contains many built-in functional interfaces. Some of them are well known from older versions of Java like `Comparator` or `Runnable`. Those existing interfaces are extended to enable Lambda support via the `@FunctionalInterface` annotation.
+在JDK1.8的API中包含许多内置功能接口。其中有些在老版Java中众所周知，比如 `Comparator` 或`Runnable`。这些现有的接口通过`@FunctionalInterface`注解的扩展支持lambda表达式。
 
-But the Java 8 API is also full of new functional interfaces to make your life easier. Some of those new interfaces are well known from the [Google Guava](https://code.google.com/p/guava-libraries/) library. Even if you're familiar with this library you should keep a close eye on how those interfaces are extended by some useful method extensions.
+但是Java8的API也充满了新的功能接口，使你开发更轻松。其中一些新的接口从[Google Guava](https://code.google.com/p/guava-libraries/)库中众所周知。即使你熟悉这个库，你也应该密切关注这些接口是如何由一些有用的方法扩展延伸的。
 
-#### Predicates
+#### Predicate接口
 
-Predicates are boolean-valued functions of one argument. The interface contains various default methods for composing predicates to complex logical terms (and, or, negate)
+Predicate是带一个参数返回布尔值的函数。该接口包含各种默认的方法组成predicates的复杂逻辑条件（and, or, negate）
 
 <?prettify linenums=1?>
     Predicate<String> predicate = (s) -> s.length() > 0;
@@ -237,9 +237,9 @@ Predicates are boolean-valued functions of one argument. The interface contains 
     Predicate<String> isEmpty = String::isEmpty;
     Predicate<String> isNotEmpty = isEmpty.negate();
     
-#### Functions
+#### Function接口
 
-Functions accept one argument and produce a result. Default methods can be used to chain multiple functions together (compose, andThen).
+Functions接受一个参数并产生一个结果。默认方法可以用来将多个函数连成一体（compose, andThen）。
 
 <?prettify linenums=1?>
     Function<String, Integer> toInteger = Integer::valueOf;
@@ -247,17 +247,17 @@ Functions accept one argument and produce a result. Default methods can be used 
 
     backToString.apply("123");     // "123"
     
-#### Suppliers
+#### Supplier接口
 
-Suppliers produce a result of a given generic type. Unlike Functions, Suppliers don't accept arguments.
+Supplier产生一个给定的泛型类型的结果。和Functions不同的是Suppliers不接受参数。
 
 <?prettify?>
     Supplier<Person> personSupplier = Person::new;
     personSupplier.get();   // new Person
     
-#### Consumers
+#### Consumer接口
 
-Consumers represents operations to be performed on a single input argument.
+Consumers表示要在单一输入参数中执行操作。
 
 <?prettify?>
     Consumer<Person> greeter = (p) -> System.out.println("Hello, " + p.firstName);
