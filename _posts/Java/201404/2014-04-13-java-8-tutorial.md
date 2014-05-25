@@ -293,9 +293,9 @@ Optional是一个存放一个值的简单容器，它可以为空或者不为空
 
 ### Streams
 
-A `java.util.Stream` represents a sequence of elements on which one or more operations can be performed. Stream operations are either _intermediate_ or _terminal_. While terminal operations return a result of a certain type, intermediate operations return the stream itself so you can chain multiple method calls in a row. Streams are created on a source, e.g. a `java.util.Collection` like lists or sets (maps are not supported). Stream operations can either be executed sequential or parallel.
+一个`java.util.Stream`表示在其上的一个或多个操作可以被执行的元素序列。流操作或是中间的或是终端的。当终端操作返回一个特定类型的结果时，中间操作返回流本身，所以你现在可以链入多个方法调用。流由源创建，比如像lists或者sets的一个`java.util.Collection`（不支持maps）。流操作可以被顺序或并行执行。
 
-Let's first look how sequential streams work. First we create a sample source in form of a list of strings:
+首先让我们来看看顺序流是如何工作的。首先我们从一个字符串列表创建一个简单的源：
 
 <?prettify linenums=1?>
     List<String> stringCollection = new ArrayList<>();
@@ -307,8 +307,8 @@ Let's first look how sequential streams work. First we create a sample source in
     stringCollection.add("ccc");
     stringCollection.add("bbb2");
     stringCollection.add("ddd1");
-    
-Collections in Java 8 are extended so you can simply create streams either by calling `Collection.stream()` or `Collection.parallelStream()`. The following sections explain the most common stream operations.
+
+集合在Java8中被扩展了，所以你可以简单地通过调用`Collection.stream()`或`Collection.parallelStream()`来创建流。以下各节介绍最常见的流操作。
 
 #### Filter
 
