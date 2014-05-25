@@ -312,7 +312,7 @@ Optional是一个存放一个值的简单容器，它可以为空或者不为空
 
 #### Filter
 
-Filter accepts a predicate to filter all elements of the stream. This operation is _intermediate_ which enables us to call another stream operation (`forEach`) on the result. ForEach accepts a consumer to be executed for each element in the filtered stream. ForEach is a terminal operation. It's `void`, so we cannot call another stream operation.
+Filter接受一个predicate来筛选数据流中的所有元素。该操作是 _中间的_ ，使我们可以在结果上调用另一个流的操作（`forEach`）。ForEach接受一个consumer为每个在过滤流中的元素执行。ForEach是一个终端操作。它是`void`的，所以我们不能调用另一个流操作。
 
 <?prettify linenums=1?>
     stringCollection
@@ -324,7 +324,7 @@ Filter accepts a predicate to filter all elements of the stream. This operation 
 
 #### Sorted
 
-Sorted is an _intermediate_ operation which returns a sorted view of the stream. The elements are sorted in natural order unless you pass a custom `Comparator`.
+Sorted是一个 _中间的_ 操作，它返回流的排序视图。元素是按自然顺序排序的，除非你传入一个自定义的`Comparator`。
 
 <?prettify linenums=1?>
     stringCollection
@@ -335,7 +335,7 @@ Sorted is an _intermediate_ operation which returns a sorted view of the stream.
 
     // "aaa1", "aaa2"
 
-Keep in mind that `sorted` does only create a sorted view of the stream without manipulating the ordering of the backed collection. The ordering of `stringCollection` is untouched:
+请记住，`sorted`仅仅是创建了流的排序视图而无需操控备份集合的顺序。`stringCollection`的顺序是没有改变的：
 
 <?prettify?>
     System.out.println(stringCollection);
@@ -343,7 +343,7 @@ Keep in mind that `sorted` does only create a sorted view of the stream without 
 
 #### Map
 
-The _intermediate_ operation `map` converts each element into another object via the given function. The following example converts each string into an upper-cased string. But you can also use `map` to transform each object into another type. The generic type of the resulting stream depends on the generic type of the function you pass to `map`.
+_中间_ 操作`map`通过给定的函数将每个元素转换到另一个对象。下面的例子把每个字符串转换成大写字符串。但是你也可以使用`map`把每个对象转换成另一种类型。所产生的数据流的泛型类型取决于你传递给`map`的函数的泛型类型。
 
 <?prettify linenums=1?>
     stringCollection
