@@ -356,7 +356,7 @@ _中间_ 操作`map`通过给定的函数将每个元素转换到另一个对象
 
 #### Match
 
-Various matching operations can be used to check whether a certain predicate matches the stream. All of those operations are terminal and return a boolean result.
+大量的匹配操作，可用于检查某个predicate是否匹配流。所有的这些操作都是最终的并且返回一个布尔结果。
 
 <?prettify linenums=1?>
     boolean anyStartsWithA = stringCollection.stream()
@@ -376,7 +376,7 @@ Various matching operations can be used to check whether a certain predicate mat
 
 #### Count
 
-Count is a _terminal_ operation returning the number of elements in the stream as a `long`.
+Count是一个以`long`类型返回流中元素的数目的 _最终的_ 操作。
 
 <?prettify linenums=1?>
     long startsWithB =
@@ -389,7 +389,7 @@ Count is a _terminal_ operation returning the number of elements in the stream a
 
 #### Reduce
 
-This _terminal_ operation performs a reduction on the elements of the stream with the given function. The result is an `Optional` holding the reduced value.
+该 _终端_ 操作通过给定的函数在流的元素上执行一个reduction操作。其结果是一个`Optional`，其保持着合并后的值。
 
 <?prettify linenums=1?>
     Optional<String> reduced =
@@ -401,13 +401,13 @@ This _terminal_ operation performs a reduction on the elements of the stream wit
     reduced.ifPresent(System.out::println);
     // "aaa1#aaa2#bbb1#bbb2#bbb3#ccc#ddd1#ddd2"
 
-### Parallel Streams
+### 并行Streams
 
-As mentioned above streams can be either sequential or parallel. Operations on sequential streams are performed on a single thread while operations on parallel streams are performed concurrent on multiple threads.
+如上文提到的，数据流可以是串行的或并行的。操作在顺序流中都在一个单独的线程中执行，而操作在并行流中是在多个线程中并发地执行的。
 
-The following example demonstrates how easy it is to increase the performance by using parallel streams.
+下面的例子演示了使用并行数据流来提高性能是多么容易。
 
-First we create a large list of unique elements:
+首先我们创建一个唯一元素的大列表：
 
 <?prettify linenums=1?>
     int max = 1000000;
@@ -417,9 +417,9 @@ First we create a large list of unique elements:
         values.add(uuid.toString());
     }
 
-Now we measure the time it takes to sort a stream of this collection.
+现在我们来测量排序这个集合流所花费的时间。
 
-#### Sequential Sort
+#### 顺序排序
 
 <?prettify linenums=1?>
     long t0 = System.nanoTime();
@@ -434,7 +434,7 @@ Now we measure the time it takes to sort a stream of this collection.
 
     // sequential sort took: 899 ms
 
-#### Parallel Sort
+#### 并行排序
 
 <?prettify linenums=1?>
     long t0 = System.nanoTime();
@@ -449,7 +449,7 @@ Now we measure the time it takes to sort a stream of this collection.
 
     // parallel sort took: 472 ms
 
-As you can see both code snippets are almost identical but the parallel sort is roughly 50% faster. All you have to do is change `stream()` to `parallelStream()`.
+正如你可以看到这两个代码片段几乎是相同的，但是并行排序大约快了50%。你只需要把`stream()` 改成 `parallelStream()`。
 
 ### Map
 
