@@ -453,7 +453,7 @@ Count是一个以`long`类型返回流中元素的数目的 _最终的_ 操作�
 
 ### Map
 
-As already mentioned maps don't support streams. Instead maps now support various new and useful methods for doing common tasks.
+正如已经提到的map不支持流。取而代之的时map现在支持做通用任务的各种新的和有用的方法。
 
 <?prettify linenums=1?>
     Map<Integer, String> map = new HashMap<>();
@@ -464,9 +464,9 @@ As already mentioned maps don't support streams. Instead maps now support variou
 
     map.forEach((id, val) -> System.out.println(val));
 
-The above code should be self-explaining: `putIfAbsent` prevents us from writing additional if null checks; `forEach` accepts a consumer to perform operations for each value of the map.
+上面的代码应该是不解自明的：`putIfAbsent`阻止我们编写额外代码做null检查；`forEach` 接受一个消费者对map的每一个值进行操作。
 
-This example shows how to compute code on the map by utilizing functions:
+这个例子说明如何通过定制函数在map上计算代码：
 
 <?prettify linenums=1?>
     map.computeIfPresent(3, (num, val) -> val + num);
@@ -481,7 +481,7 @@ This example shows how to compute code on the map by utilizing functions:
     map.computeIfAbsent(3, num -> "bam");
     map.get(3);             // val33
 
-Next, we learn how to remove entries for a a given key, only if it's currently mapped to a given value:
+接下来，我们将学习如何对给定的键删除条目，只有当它的当前映射到给定的值：
 
 <?prettify linenums=1?>
     map.remove(3, "val3");
@@ -490,12 +490,12 @@ Next, we learn how to remove entries for a a given key, only if it's currently m
     map.remove(3, "val33");
     map.get(3);             // null
 
-Another helpful method:
+另一个有用的方法：
 
 <?prettify?>
     map.getOrDefault(42, "not found");  // not found
 
-Merging entries of a map is quite easy:
+合并map的条目是很容易的：
 
 <?prettify linenums=1?>
     map.merge(9, "val9", (value, newValue) -> value.concat(newValue));
@@ -504,4 +504,4 @@ Merging entries of a map is quite easy:
     map.merge(9, "concat", (value, newValue) -> value.concat(newValue));
     map.get(9);             // val9concat
 
-Merge either put the key/value into the map if no entry for the key exists, or the merging function will be called to change the existing value.
+合并要么把键/值放入map，如果该键不存在任何条目，或者合并函数将被调用用来改变现有的值。
