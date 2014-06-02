@@ -506,13 +506,13 @@ Count是一个以`long`类型返回流中元素的数目的 _最终的_ 操作�
 
 合并要么把键/值放入map，如果该键不存在任何条目，或者合并函数将被调用用来改变现有的值。
 
-### Date API
+### 日期API
 
-Java 8 contains a brand new date and time API under the package `java.time`. The new Date API is comparable with the [Joda-Time](http://www.joda.org/joda-time/) library, however it's [not the same](http://blog.joda.org/2009/11/why-jsr-310-isn-joda-time_4941.html). The following examples cover the most important parts of this new API.
+Java 8在`java.time`包下包含一个全新的日期和时间API。新的日期API是与[Joda-Time](http://www.joda.org/joda-time/)库相媲美的，但是它是[不一样的](http://blog.joda.org/2009/11/why-jsr-310-isn-joda-time_4941.html)。下列实例涵盖了这个新API中最重要的部分。
 
 #### Clock
 
-Clock provides access to the current date and time. Clocks are aware of a timezone and may be used instead of `System.currentTimeMillis()` to retrieve the current milliseconds. Such an instantaneous point on the time-line is also represented by the class `Instant`. Instants can be used to create legacy `java.util.Date` objects.
+Clock提供了访问当前的日期和时间。Clock知道一个时区，并且可以被用来代替`System.currentTimeMillis()`来检索当前的毫秒数。在时间轴上这样一个瞬时点也由类`Instant`表示。Instants可以被用来创建遗留的`java.util.Date`对象。
 
 <?prettify linenums=1?>
     Clock clock = Clock.systemDefaultZone();
@@ -523,7 +523,7 @@ Clock provides access to the current date and time. Clocks are aware of a timezo
 
 #### Timezones
 
-Timezones are represented by a `ZoneId`. They can easily be accessed via static factory methods. Timezones define the offsets which are important to convert between instants and local dates and times.
+Timezones被一个`ZoneId`代表。他们可以很容易地通过静态工厂方法访问。Timezones定义了偏移量，这对于instants和本地日期和时间的转换是很重要的。
 
 <?prettify linenums=1?>
     System.out.println(ZoneId.getAvailableZoneIds());
@@ -539,7 +539,7 @@ Timezones are represented by a `ZoneId`. They can easily be accessed via static 
 
 #### LocalTime
 
-LocalTime represents a time without a timezone, e.g. 10pm or 17:30:15. The following example creates two local times for the timezones defined above. Then we compare both times and calculate the difference in hours and minutes between both times.
+LocalTime表示没有时区的时间，比如10pm 或 17:30:15。下面的例子为上面定义的时区创建了两个本地时间。然后我们比较两个时间并且计算这两个时间之间的小时和分钟的差异。
 
 <?prettify linenums=1?>
     LocalTime now1 = LocalTime.now(zone1);
@@ -553,7 +553,7 @@ LocalTime represents a time without a timezone, e.g. 10pm or 17:30:15. The follo
     System.out.println(hoursBetween);       // -3
     System.out.println(minutesBetween);     // -239
 
-LocalTime comes with various factory method to simplify the creation of new instances, including parsing of time strings.
+LocalTime带有各种工厂方法来简化创建新的实例，包括时间字符串解析。
 
 <?prettify linenums=1?>
     LocalTime late = LocalTime.of(23, 59, 59);
@@ -567,7 +567,7 @@ LocalTime comes with various factory method to simplify the creation of new inst
 
 #### LocalDate
 
-LocalDate represents a distinct date, e.g. 2014-03-11. It's immutable and works exactly analog to LocalTime. The sample demonstrates how to calculate new dates by adding or substracting days, months or years. Keep in mind that each manipulation returns a new instance.
+LocalDate代表不同的日期，比如：2014-03-11。它是不可变的并且工作方式恰好和LocalTime类似。该示例演示了如何通过添加或减去天，月，年来计算新的日期。请记住，每个操作返回一个新的实例。
 
 <?prettify linenums=1?>
     LocalDate today = LocalDate.now();
@@ -578,7 +578,7 @@ LocalDate represents a distinct date, e.g. 2014-03-11. It's immutable and works 
     DayOfWeek dayOfWeek = independenceDay.getDayOfWeek();
     System.out.println(dayOfWeek);    // FRIDAY
 
-Parsing a LocalDate from a string is just as simple as parsing a LocalTime:
+从字符串解析LocalDate和解析LocalTime一样简单：
 
 <?prettify linenums=1?>
     DateTimeFormatter germanFormatter = DateTimeFormatter
