@@ -589,7 +589,7 @@ LocalDate代表不同的日期，比如：2014-03-11。它是不可变的并且�
 
 #### LocalDateTime
 
-LocalDateTime represents a date-time. It combines date and time as seen in the above sections into one instance. `LocalDateTime` is immutable and works similar to LocalTime and LocalDate. We can utilize methods for retrieving certain fields from a date-time:
+LocalDateTime表示日期-时间。它集合上述各节看到的日期和时间到一个实例。`LocalDateTime`是不可变的，工作原理类似LocalTime和LocalDate。我们可以利用方法从一个DateTime检索某些字段：
 
 <?prettify linenums=1?>
     LocalDateTime sylvester = LocalDateTime.of(2014, Month.DECEMBER, 31, 23, 59, 59);
@@ -603,7 +603,7 @@ LocalDateTime represents a date-time. It combines date and time as seen in the a
     long minuteOfDay = sylvester.getLong(ChronoField.MINUTE_OF_DAY);
     System.out.println(minuteOfDay);    // 1439
 
-With the additional information of a timezone it can be converted to an instant. Instants can easily be converted to legacy dates of type java.util.Date.
+通过时区的附加信息，它能被转换成一个instant。Instants可以很容易转换成遗留的日期类型java.util.Date。
 
 <?prettify linenums=1?>
     Instant instant = sylvester.atZone(ZoneId.systemDefault()).toInstant();
@@ -611,8 +611,7 @@ With the additional information of a timezone it can be converted to an instant.
     Date legacyDate = Date.from(instant);
     System.out.println(legacyDate);     // Wed Dec 31 23:59:59 CET 2014
 
-
-Formatting date-times works just like formatting dates or times. Instead of using pre-defined formats we can create formatters from custom patterns.
+格式化date-times的工作原理就像格式化日期或者时间。我们可以从自定义模式创建格式化程序，取代使用预定义的格式。
 
 <?prettify linenums=1?>
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy - HH:mm");
@@ -621,15 +620,15 @@ Formatting date-times works just like formatting dates or times. Instead of usin
     String string = formatter.format(parsed);
     System.out.println(string);     // Nov 03, 2014 - 07:13
 
-Unlike `java.text.NumberFormat` the new `DateTimeFormatter` is immutable and **thread-safe**.
+新的`DateTimeFormatter`不像`java.text.NumberFormat`，它是不可变的，并且是**线程安全的**。
 
-For details on the pattern syntax read [here](http://download.java.net/jdk8/docs/api/java/time/format/DateTimeFormatter.html).
+有关模式语法的细节，请阅读[这里](http://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)。
 
 ### Annotations
 
-Annotations in Java 8 are repeatable. Let's dive directly into an example to figure that out.
+在Java 8中注解是可重复的。让我们直接潜入一个例子就明白这一点。
 
-First, we define a wrapper annotation which holds an array of the actual annotations:
+首先，我们定义一个包装注解，其持有实际注解的数组：
 
 <?prettify linenums=1?>
     @interface Hints {
@@ -641,22 +640,22 @@ First, we define a wrapper annotation which holds an array of the actual annotat
         String value();
     }
 
-Java 8 enables us to use multiple annotations of the same type by declaring the annotation `@Repeatable`.
+Java 8使我们通过声明`@Repeatable`注解重复使用相同类型的多个注解。
 
-Variant 1: Using the container annotation (old school)
+变型1：使用容器注解（老同学）
 
 <?prettify linenums=1?>
     @Hints({@Hint("hint1"), @Hint("hint2")})
     class Person {}
 
-Variant 2: Using repeatable annotations (new school)
+变型2：使用可重复注解（新同学）
 
 <?prettify linenums=1?>
     @Hint("hint1")
     @Hint("hint2")
     class Person {}
 
-Using variant 2 the java compiler implicitly sets up the @Hints annotation under the hood. That's important for reading annotation informations via reflection.
+使用变型2，Java编译器隐式地设置了@Hints注解到当前类下。这对通过反射读取注解信息很重要。
 
 <?prettify linenums=1?>
     Hint hint = Person.class.getAnnotation(Hint.class);
@@ -668,18 +667,20 @@ Using variant 2 the java compiler implicitly sets up the @Hints annotation under
     Hint[] hints2 = Person.class.getAnnotationsByType(Hint.class);
     System.out.println(hints2.length);          // 2
 
-Although we never declared the @Hints annotation on the Person class, it's still readable via getAnnotation(Hints.class). However, the more convenient method is getAnnotationsByType which grants direct access to all annotated @Hint annotations.
+虽然我们从未在Person类上声明@Hints注解，但是它仍然可以通过getAnnotation(Hints.class)读取到。然而，更方便的方法是getAnnotationsByType，它授予直接访问所有标注@Hint的注解。
 
-Furthermore the usage of annotations in Java 8 is expanded to two new targets:
+此外，在Java 8中，注解的使用扩展到两个新的目标：
 
 <?prettify linenums=1?>
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     @interface MyAnnotation {}
 
-### That's it
+### 这就是它
 
-My programming guide to Java 8 ends here. If you want to learn more about all the new classes and features of the JDK 8 API, just read my [follow up article](http://winterbe.com/posts/2014/03/29/jdk8-api-explorer/). It helps you figuring out all the new classes and hidden gems of JDK 8, like `Arrays.parallelSort`, `StampedLock` and `CompletableFuture` - just to name a few.
+我的Java 8编程指南到此为止。如果你想了解更多JDK 8 API的所有新类和特性，只需要看我的[后续文章](http://winterbe.com/posts/2014/03/29/jdk8-api-explorer/)。它可以帮你找出JDK 8所有的新类和隐藏精华，像`Arrays.parallelSort`, `StampedLock` 和 `CompletableFuture` - 只是仅举几例。
 
-I recently published a [Java 8 Nashorn Tutorial](http://winterbe.com/posts/2014/04/05/java8-nashorn-tutorial/). The Nashorn Javascript Engine enables you to run javascript code natively on the JVM.
+我最近发表了[Java 8 Nashorn 教程](http://winterbe.com/posts/2014/04/05/java8-nashorn-tutorial/)。Nashorn Javascript引擎使你能够在JVM上运行原生javascript代码。
 
-I hope this guide was helpful to you and you enjoyed reading it. The full source code of the tutorial samples is [hosted on GitHub](https://github.com/winterbe/java8-tutorial). Feel free to [fork the repository](https://github.com/winterbe/java8-tutorial/fork) or send me your feedback via [Twitter](https://twitter.com/benontherun).
+我希望本指南是对你有帮助的，并且你能喜欢阅读它。本教程例子的完整源代码[托管在GitHub上](https://github.com/winterbe/java8-tutorial)。随意[fork the repository](https://github.com/winterbe/java8-tutorial/fork) 或者通过[Twitter](https://twitter.com/benontherun)给我发送你的反馈。
+
+-全文完
