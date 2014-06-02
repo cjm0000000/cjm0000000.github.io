@@ -14,6 +14,7 @@ tags: [JMM]
 *有关内存模型正在进行的工作信息，参见 [Bill Pugh's Java Memory Model pages](http://www.cs.umd.edu/~pugh/java/memoryModel/).*
 
 考虑这个微小的类，没有任何同步定义：
+
 <?prettify linenums=1?>
     final class SetCheck {
       private int  a = 0;
