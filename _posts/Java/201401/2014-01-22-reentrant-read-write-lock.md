@@ -9,7 +9,7 @@ tags: [concurrent]
 <?prettify?>
     public class ReentrantReadWriteLock extends Object implements ReadWriteLock, Serializable
 
-[Java Doc 地址] (http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/ReentrantReadWriteLock.html)
+[Java Doc 地址](http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/ReentrantReadWriteLock.html)
 
 ## 文档翻译
 

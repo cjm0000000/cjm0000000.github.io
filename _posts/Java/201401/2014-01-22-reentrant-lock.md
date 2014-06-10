@@ -9,7 +9,7 @@ tags: [concurrent]
 <?prettify ?>
     public class ReentrantLock extends Object implements Lock, Serializable
 	
-[Java Doc 地址] (http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/ReentrantLock.html)
+[Java Doc 地址](http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/ReentrantLock.html)
 
 ## 文档翻译
 
