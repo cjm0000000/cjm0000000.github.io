@@ -17,17 +17,17 @@ tags: [JMM]
 
 <?prettify linenums=1?>
     final class SetCheck {
-      private int  a = 0;
-      private long b = 0;
+        private int  a = 0;
+        private long b = 0;
 
-      void set() {
-        a =  1;
-        b = -1;
-      }
+        void set() {
+            a =  1;
+            b = -1;
+        }
 
-      boolean check() {
-        return ((b ==  0) || (b == -1 && a == 1)); 
-      }
+        boolean check() {
+            return ((b ==  0) || (b == -1 && a == 1)); 
+        }
     }
 
 在一个纯粹有序的语言，`check`方法可能永远不会返回`false`。这是成立的，即使编译器，运行时系统和硬件可能通过某种你无法直观地想到的途径处理这个代码。例如，以下任何一种可能适用于`set`方法的执行：
