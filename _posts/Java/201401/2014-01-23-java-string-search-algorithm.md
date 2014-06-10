@@ -9,10 +9,12 @@ tags: [Algorithm]
 
 
 今天抽空研究了String的源码。
+
 <?prettify linenums=1?>
     int indexOf(String str);
 	
 核心查找代码如下：
+
 <?prettify linenums=1?>
     for (int i = sourceOffset + fromIndex; i <= max; i++) {  
 		/* Look for first character. */  
@@ -51,6 +53,7 @@ tags: [Algorithm]
 对于字符串查找场景较多，并且字符串很长的情况（可能需要查找的子串靠近源字符串的后半部分），这个方法可能效率不够高；
 
 接着写 `int lastIndexOf(String str)`，先上源码：
+
 <?prettify linenums=1?>
 	int strLastIndex = targetOffset + targetCount - 1;  
 	char strLastChar = target[strLastIndex];  
