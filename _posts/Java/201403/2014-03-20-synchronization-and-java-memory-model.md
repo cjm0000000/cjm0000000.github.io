@@ -46,11 +46,9 @@ tags: [JMM]
 
 在并发编程里情况就不同了。在这里，完全可能一个线程调用`check`方法的同时另一个线程正在执行`set`方法，在这种情况下，`check`方法可能在优化的执行集合被“侦察”到。如果发生上述任何操作，`check`方法可能返回`false`。例如，详情如下，`check`方法可以读取一个长整形`b`的值，它既不是0也不是-1，而是一个写了一半的*中间值*。此外，`set`方法中语句的乱序执行可能导致`check`方法读取`b`的值是-1，但是读到的`a`的值仍旧是0。
 
-In other words, not only may concurrent executions be interleaved, but they may also be reordered and otherwise manipulated in an optimized form that bears little resemblance to their source code. As compiler and run-time technology matures and multiprocessors become more prevalent, such phenomena become more common. They can lead to surprising results for programmers with backgrounds in sequential programming (in other words, just about all programmers) who have never been exposed to the underlying execution properties of allegedly sequential code. This can be the source of subtle concurrent programming errors.
-
 换句话说，不仅可以被交错地并发执行，但他们也可能被重排序，并且以优化的形式操作，不像他们的源代码。由于编译器和运行时技术的成熟和多处理器变得越来越普遍，这种现象变得越来越普遍。对于在顺序编程背景下的程序员（换句话说，几乎所有的程序员），谁从来没有接触过据称顺序代码的底层执行属性，他们可能会导致意想不到的结果。这可能是细微的并发编程错误来源。
 
-In almost all cases, there is an obvious, simple way to avoid contemplation of all the complexities arising in concurrent programs due to optimized execution mechanics: Use synchronization. For example, if both methods in class SetCheck are declared as synchronized, then you can be sure that no internal processing details can affect the intended outcome of this code.
+在几乎所有的情况下，有一个明显的，简单的方式避免在并发程序中由于优化执行机制带来的复杂性沉思：使用同步。例如，如果SetCheck类中的两个方法都声明为同步，那么你可以肯定没有内部处理细节可以影响这个代码的预期结果。
 
 But sometimes you cannot or do not want to use synchronization. Or perhaps you must reason about someone else's code that does not use it. In these cases you must rely on the minimal guarantees about resulting semantics spelled out by the Java Memory Model. This model allows the kinds of manipulations listed above, but bounds their potential effects on execution semantics and additionally points to some techniques programmers can use to control some aspects of these semantics (most of which are discussed in §2.4).
 
