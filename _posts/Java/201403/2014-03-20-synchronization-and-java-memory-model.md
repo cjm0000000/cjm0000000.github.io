@@ -50,9 +50,29 @@ tags: [JMM]
 
 在几乎所有的情况下，有一个明显的，简单的方式避免在并发程序中由于优化执行机制带来的复杂性沉思：使用同步。例如，如果SetCheck类中的两个方法都声明为同步，那么你可以肯定没有内部处理细节可以影响这个代码的预期结果。
 
-But sometimes you cannot or do not want to use synchronization. Or perhaps you must reason about someone else's code that does not use it. In these cases you must rely on the minimal guarantees about resulting semantics spelled out by the Java Memory Model. This model allows the kinds of manipulations listed above, but bounds their potential effects on execution semantics and additionally points to some techniques programmers can use to control some aspects of these semantics (most of which are discussed in §2.4).
+但有时你不能或不想使用同步。或者你必须推出别人的代码不使用它。在这种情况下，你必须依赖Java内存模型阐明的最小语义保证。这种模式允许多种上述操作，但限定他们对执行语义的潜在影响，并且还指出了程序员可以用于控制这些语义的某些方面的技术（其中大部分在§2.4中讨论）。
 
-The Java Memory Model is part of The JavaTM Language Specification, described primarily in JLS chapter 17. Here, we discuss only the basic motivation, properties, and programming consequences of the model. The treatment here reflects a few clarifications and updates that are missing from the first edition of JLS.
+Java内存模型是Java&trade;语言规范的一部分，主要是在第17章JLS中描述。在这里，我们只讨论基本的动机，性质和模型的编程后果。这里的处理方式反映了一些澄清和从第一版的JLS缺少的更新。
 
-The assumptions underlying the model can be viewed as an idealization of a standard SMP machine of the sort described in §1.2.4:
+该模型的基本假设可以被看作是在§1.2.4中描述的那种标准的SMP机器的理想化：
 
+<img class="imgaligncenter" src="/images/synchronization-and-java-memory-model-1.gif" />
+
+For purposes of the model, every thread can be thought of as running on a different CPU from any other thread. Even on multiprocessors, this is infrequent in practice, but the fact that this CPU-per-thread mapping is among the legal ways to implement threads accounts for some of the model's initially surprising properties. For example, because CPUs hold registers that cannot be directly accessed by other CPUs, the model must allow for cases in which one thread does not know about values being manipulated by another thread. However, the impact of the model is by no means restricted to multiprocessors. The actions of compilers and processors can lead to identical concerns even on single-CPU systems.
+
+The model does not specifically address whether the kinds of execution tactics discussed above are performed by compilers, CPUs, cache controllers, or any other mechanism. It does not even discuss them in terms of classes, objects, and methods familiar to programmers. Instead, the model defines an abstract relation between threads and main memory. Every thread is defined to have a working memory (an abstraction of caches and registers) in which to store values. The model guarantees a few properties surrounding the interactions of instruction sequences corresponding to methods and memory cells corresponding to fields. Most rules are phrased in terms of when values must be transferred between the main memory and per-thread working memory. The rules address three intertwined issues:
+
+- *Atomicity*  
+    Which instructions must have indivisible effects. For purposes of the model, these rules need to be stated only for simple reads and writes of memory cells representing fields - instance and static variables, also including array elements, but not including local variables inside methods.
+    
+- *Visibility*  
+    Under what conditions the effects of one thread are visible to another. The effects of interest here are writes to fields, as seen via reads of those fields.
+    
+- *Ordering*  
+Under what conditions the effects of operations can appear out of order to any given thread. The main ordering issues surround reads and writes associated with sequences of assignment statements.
+
+When synchronization is used consistently, each of these properties has a simple characterization: All changes made in one synchronized method or block are atomic and visible with respect to other synchronized methods and blocks employing the same lock, and processing of synchronized methods or blocks within any given thread is in program-specified order. Even though processing of statements within blocks may be out of order, this cannot matter to other threads employing synchronization.
+
+When synchronization is not used or is used inconsistently, answers become more complex. The guarantees made by the memory model are weaker than most programmers intuitively expect, and are also weaker than those typically provided on any given JVM implementation. This imposes additional obligations on programmers attempting to ensure the object consistency relations that lie at the heart of exclusion practices: Objects must maintain invariants as seen by all threads that rely on them, not just by the thread performing any given state modification.
+
+The most important rules and properties specified by the model are discussed below.
