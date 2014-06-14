@@ -60,10 +60,10 @@ Java内存模型是Java&trade;语言规范的一部分，主要是在第17章JLS
 
 对模型的目的，每个线程可以被看作运行在与其它任何线程不同的CPU上。即使是在多处理器上，这实际上是罕见的，但事实证明这种每个线程映射到CPU是合法的方式去为一些模型的最初的令人惊奇的性质实现线程账户。例如，因为CPU持有的寄存器不能被其他CPU直接访问，该模型必须允许一个线程不知道被另一个线程操纵的值的情况。然而，该模型的影响绝非限于多处理器。即使在单CPU系统，编译器和处理器的操作可能导致相同的顾虑。
 
-The model does not specifically address whether the kinds of execution tactics discussed above are performed by compilers, CPUs, cache controllers, or any other mechanism. It does not even discuss them in terms of classes, objects, and methods familiar to programmers. Instead, the model defines an abstract relation between threads and main memory. Every thread is defined to have a working memory (an abstraction of caches and registers) in which to store values. The model guarantees a few properties surrounding the interactions of instruction sequences corresponding to methods and memory cells corresponding to fields. Most rules are phrased in terms of when values must be transferred between the main memory and per-thread working memory. The rules address three intertwined issues:
+该模型并没有特别提及是否上面讨论的执行策略的种类是由编译器，处理器，缓存控制器或任何其它机制进行。它甚至没有讨论程序员熟悉的类，对象和方法。相反，该模型定义了线程和主内存之间的抽象关系。每个线程都被定义为具有一个工作内存（高速缓存和寄存器的抽象），在其中可以存储值。该模型保证了一些属性围绕对应于方法和内存单元对应的指令序列的相互作用。大多数规则的措辞中，当值必须与主内存和每个线程的工作内存之间传输的方面。该规则解决三个相互交织的问题：
 
-- *Atomicity*  
-    Which instructions must have indivisible effects. For purposes of the model, these rules need to be stated only for simple reads and writes of memory cells representing fields - instance and static variables, also including array elements, but not including local variables inside methods.
+- *原子性*  
+指令必须有不可分割的效果。出于模型的目的，这些规则需要说明仅适用于简单的读取和表示字段的存储单元的写入 - 实例和静态变量，也包括数组元素，但不包括方法内部的局部变量。
     
 - *Visibility*  
     Under what conditions the effects of one thread are visible to another. The effects of interest here are writes to fields, as seen via reads of those fields.
