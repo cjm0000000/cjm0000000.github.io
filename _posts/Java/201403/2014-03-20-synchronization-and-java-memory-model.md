@@ -65,11 +65,11 @@ Java内存模型是Java&trade;语言规范的一部分，主要是在第17章JLS
 - *原子性*  
 指令必须有不可分割的效果。出于模型的目的，这些规则需要说明仅适用于简单的读取和表示字段的存储单元的写入 - 实例和静态变量，也包括数组元素，但不包括方法内部的局部变量。
     
-- *Visibility*  
-    Under what conditions the effects of one thread are visible to another. The effects of interest here are writes to fields, as seen via reads of those fields.
+- *可见性*  
+在什么条件下一个线程的影响对另一个线程可见的。这里感兴趣的影响是写入字段，可以通过读取这些字段看到。
     
-- *Ordering*  
-Under what conditions the effects of operations can appear out of order to any given thread. The main ordering issues surround reads and writes associated with sequences of assignment statements.
+- *有序性*  
+在什么条件下操作的影响对任何给定的线程可能出现乱序。主要排序问题围绕读写和赋值语句的顺序有关。
 
 When synchronization is used consistently, each of these properties has a simple characterization: All changes made in one synchronized method or block are atomic and visible with respect to other synchronized methods and blocks employing the same lock, and processing of synchronized methods or blocks within any given thread is in program-specified order. Even though processing of statements within blocks may be out of order, this cannot matter to other threads employing synchronization.
 
