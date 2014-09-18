@@ -54,13 +54,45 @@ tags: [Virtualization]
 等到安装完成，点击reboot按钮重启。接下去通过SSH连接上去创建用户，配置环境。
 
 ### 配置CentOS 7
-#### 创建用户
 
+#### 创建用户
+<?prettify linenums=1?>
+    [root@CT70 ~]# useradd zlm
+    [root@CT70 ~]# passwd zlm
+    更改用户 zlm 的密码 。
+    新的 密码：
+    无效的密码： 密码是一个回文
+    重新输入新的 密码：
+    passwd：所有的身份验证令牌已经成功更新。
+
+#### 配置网络
+CentOS 7默认是没有安装ifconfig的，需要手动安装：
+
+<?prettify?>
+     yum install net-tools
 
 
 ## 安装Docker
+安装过程参考[官方文档](https://docs.docker.com/installation/binaries/)。
+需要安装git：
 
+<?prettify?>
+    yum install git
 
+#### 下载最新的Docker：
+<?prettify?>
+    $ wget https://get.docker.io/builds/Linux/x86_64/docker-latest -O docker
+    $ chmod +x docker
+
+#### 守护进程方式运行Docker
+<?prettify?>
+    # start the docker in daemon mode from the directory you unpacked
+    $ sudo ./docker -d &
+
+#### 允许非root访问
+The docker daemon always runs as the root user, and the docker daemon binds to a Unix socket instead of a TCP port. By default that Unix socket is owned by the user root, and so, by default, you can access it with sudo.
+
+If you (or your Docker installer) create a Unix group called docker and add users to it, then the docker daemon will make the ownership of the Unix socket read/writable by the docker group when the daemon starts. The docker daemon must always run as the root user, but if you run the docker client as a user in the docker group then you don't need to add sudo to all the client commands.
 ## 参考资料
 
 - [CentOS - Docker Documentation](https://docs.docker.com/installation/centos/)
