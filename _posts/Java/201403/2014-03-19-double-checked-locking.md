@@ -150,6 +150,7 @@ Paul Jakubik找到一个使用双重检查锁定没有正常工作的例子[A sl
 如果你创建的单例是静态的（比如，也只会创建一个`Helper`），相对于另一个对象的属性（比如，每个`Foo`对象将只有一个`Helper`），有一个简单而优雅的解决方案。
 
 只要在一个单独的类定义`singleton`为一个静态字段。`Java`的语义保证该字段不会被初始化，直到字段被引用，并且访问该字段的所有线程都会看到所有初始化那个字段造成的写入。
+
 <?prettify linenums=1?>
     class HelperSingleton {
       static Helper singleton = new Helper();
@@ -158,6 +159,7 @@ Paul Jakubik找到一个使用双重检查锁定没有正常工作的例子[A sl
 #### 这将适用于32位的原始值
 
 虽然双重锁定检查习语不能用于对对象的引用，它可以为32位基本类型值工作（例如，`int`的或者`float`的）。需要注意的是`long`或者`double`不起作用，因为非同步读/写64位基本类型不能保证原子性。
+
 <?prettify linenums=1?>
     // Correct Double-Checked Locking for 32-bit primitives
     class Foo { 
@@ -176,6 +178,7 @@ Paul Jakubik找到一个使用双重检查锁定没有正常工作的例子[A sl
     }
 
 事实上，假设`computeHashCode`函数总是返回相同的结果并且不会产生副作用（即幂等）,你甚至可以去掉所有同步。
+
 <?prettify linenums=1?>
     // Lazy initialization 32-bit primitives
     // Thread-safe if computeHashCode is idempotent
@@ -195,6 +198,7 @@ Paul Jakubik找到一个使用双重检查锁定没有正常工作的例子[A sl
 #### 通过显示内存栅栏使其工作
 
 如果你有明确的内存屏障指令，使双重检查锁定模式工作是可能的。例如，如果你用`C++`编程，你可以使用来自道格·施密特等人书中的代码：
+
 <?prettify linenums=1?>
     // C++ implementation with explicit memory barriers
     // Should work on any platform, including DEC Alphas
@@ -226,6 +230,7 @@ Paul Jakubik找到一个使用双重检查锁定没有正常工作的例子[A sl
 ### 使用线程本地存储修复双重检查锁定
 
 Alexander Terekhov (TEREKHOV@de.ibm.com)提出了巧妙的建议，使用线程本地存储实现双重检查锁定。每个线程都保持一个线程的本地标志来确定线程是否做了必要的同步。
+
 <?prettify linenums=1?>
     class Foo {
 	 /** If perThreadInstance.get() returns a non-null value, this thread
@@ -258,6 +263,7 @@ Alexander Terekhov (TEREKHOV@de.ibm.com)提出了巧妙的建议，使用线程�
 `JDK5`和更高版本扩展了`volatile`的语义，从而使系统将不允许`volatile`写相对于之前的任何读或写被重新排序，并且`volatile`读不能相对于任何随后的读或写重新排序。参见[Jeremy Manson的博客中该条目](http://jeremymanson.blogspot.com/2008/05/double-checked-locking.html)了解更多详情。
 
 随着这种变化，通过声明`helper`字段为`volatile`，双重检查锁定习语可以工作。这在`JDK4`或者更早版本下不能工作。
+
 <?prettify linenums=1?>
     // Works with acquire/release semantics for volatile
     // Broken under current semantics for volatile
