@@ -89,12 +89,38 @@ CentOS 7默认是没有安装ifconfig的，需要手动安装：
     # start the docker in daemon mode from the directory you unpacked
     $ sudo ./docker -d &
 
-#### 允许非root访问
-The docker daemon always runs as the root user, and the docker daemon binds to a Unix socket instead of a TCP port. By default that Unix socket is owned by the user root, and so, by default, you can access it with sudo.
+#### 运行第一个容器
+<?prettify?>
+    # check your docker version
+    $ sudo ./docker version
 
-If you (or your Docker installer) create a Unix group called docker and add users to it, then the docker daemon will make the ownership of the Unix socket read/writable by the docker group when the daemon starts. The docker daemon must always run as the root user, but if you run the docker client as a user in the docker group then you don't need to add sudo to all the client commands.
+    # run a container and open an interactive shell in the container
+    $ sudo ./docker run -i -t ubuntu /bin/bash
+    
+相关输出如下：
+
+<?prettify?>
+    [zlm@CT70 ~]$ sudo ./docker version
+    Client version: 1.2.0
+    Client API version: 1.14
+    Go version (client): go1.3.1
+    Git commit (client): fa7b24f
+    OS/Arch (client): linux/amd64
+    [info] GET /v1.14/version
+    [ec3b47ff] +job version()
+    [ec3b47ff] -job version() = OK (0)
+    Server version: 1.2.0
+    Server API version: 1.14
+    Go version (server): go1.3.1
+    Git commit (server): fa7b24f
+
+### Docker Hub
+
+
 ## 参考资料
 
 - [CentOS - Docker Documentation](https://docs.docker.com/installation/centos/)
+- [Binaries - Docker Documentation](https://docs.docker.com/installation/binaries/)
+- [The Docker User Guide - Docker Documentation](https://docs.docker.com/userguide/)
 
 
