@@ -7,7 +7,8 @@ tags: [Multi-Thread]
 ---
 {% include JB/setup %}
 
-__本文译自[Java theory and practice: Dealing with InterruptedException](http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html) | [PDF](http://www.ibm.com/developerworks/java/library/j-jtp05236/j-jtp05236-pdf.pdfhttp://www.ibm.com/developerworks/java/library/j-jtp05236/j-jtp05236-pdf.pdf)__
+本文译自[Java theory and practice: Dealing with InterruptedException](http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html)  
+[PDF](http://www.ibm.com/developerworks/java/library/j-jtp05236/j-jtp05236-pdf.pdfhttp://www.ibm.com/developerworks/java/library/j-jtp05236/j-jtp05236-pdf.pdf)
 
 这个故事大概很熟悉：你正在写一个测试程序并且你需要暂停一段时间，一次你调用了`Thread.sleep()`方法。但随后编译器或者IDE指出你还没有处理检查异常`InterruptedException`。`InterruptedException`是什么？为什么你需要处理它？  
 对`InterruptedException`异常最常见的反应是吞掉它 -- 捕获它并且什么都不做（或者记录它，这没有任何改进） --正如我们将在[清单4](#code4)看到的。不幸的是这种方法扔掉了中断发生的事实这个重要信息，这可能会损害应用程序取消活动的线程或者及时关闭的能力。

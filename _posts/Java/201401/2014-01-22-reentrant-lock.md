@@ -9,7 +9,7 @@ tags: [concurrent]
 <?prettify ?>
     public class ReentrantLock extends Object implements Lock, Serializable
 	
-[Java Doc 地址] (http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/ReentrantLock.html)
+[Java Doc 地址](http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/ReentrantLock.html)
 
 ## 文档翻译
 
@@ -21,6 +21,7 @@ tags: [concurrent]
 
 
 这是推荐的做法：在调用锁之后总是紧跟一个`try`块，最典型的是下面的前/后结构：
+
 <?prettify linenums=1?>
     class X {
 	   private final ReentrantLock lock = new ReentrantLock();
@@ -50,13 +51,15 @@ tags: [concurrent]
 
 这种模式锁的操作相对简单一些。
 
-##### 获取锁  
+##### 获取锁
+
 <?prettify linenums=1?>
     protected final boolean tryAcquire(int acquires) {
         return nonfairTryAcquire(acquires);
     }
 
 可以看出这里获取锁是通过委托`nonfairTryAcquire`方法来实现的：
+
 <?prettify linenums=1?>
     final boolean nonfairTryAcquire(int acquires) {
         final Thread current = Thread.currentThread();
@@ -83,6 +86,7 @@ tags: [concurrent]
 3. 其他情况都无法获取到锁，返回`false`。
 
 ##### 释放锁
+
 <?prettify linenums=1?>
     protected final boolean tryRelease(int releases) {
         int c = getState() - releases;
@@ -106,6 +110,7 @@ tags: [concurrent]
 这个模式下获取锁的逻辑相对复杂一些。
 
 ##### 获取锁
+
 <?prettify linenums=1?>
     protected final boolean tryAcquire(int acquires) {
         final Thread current = Thread.currentThread();
@@ -134,6 +139,7 @@ tags: [concurrent]
 公平模式下释放锁的逻辑和非公平模式下的一模一样。
 
 `ReentrantLock`有一个需要注意的方法，那就是`tryLock`( _上文也已经提及过_ )，在设置了公平策略的情况下，你不要期望这个方法遵守公平策略，因为：
+
 <?prettify linenums=1?>
     public boolean tryLock() {
         return sync.nonfairTryAcquire(1);

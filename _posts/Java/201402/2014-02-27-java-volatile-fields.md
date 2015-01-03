@@ -28,7 +28,7 @@ Java编程语言提供了第二种机制，`volatile` 字段，它在某些目�
 
 *如果在下面的例子中，一个线程反复调用 `one` 方法（但是总共调用次数不超过 `Integer.MAX_VALUE` ），而另一个线程反复调用 `two` 方法： *
 
-    <?prettify?>
+<?prettify?>
     class Test {
         static int i = 0, j = 0;
         static void one() { i++; j++; }
@@ -40,7 +40,8 @@ Java编程语言提供了第二种机制，`volatile` 字段，它在某些目�
 *然后 `two` 方法打印出的 `j` 的值偶尔会比 `i` 的值大，因为例子没有包含同步，而且根据在[§17.4](http://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html#jls-17.4)的规则，共享变量 `i` 和 `j` 的值可能会乱序更新。*
 
 *一种防止这种乱序执行行为的方式是把 `one` 方法和 `two` 方法声明为 `synchronized`（[§8.4.3.6](http://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.4.3.6)）*
-    <?prettify?>
+
+<?prettify?>
     class Test {
         static int i = 0, j = 0;
         static synchronized void one() { i++; j++; }
@@ -53,7 +54,7 @@ Java编程语言提供了第二种机制，`volatile` 字段，它在某些目�
 
 *另一种方法是把 `i` 和 `j` 声明为 `volatile`*
 
-    <?prettify?>
+<?prettify?>
     class Test {
         static volatile int i = 0, j = 0;
         static void one() { i++; j++; }

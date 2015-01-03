@@ -10,11 +10,13 @@ tags: [native]
 最近在阅读Java并发组件源码，发现很多方法的底层都是涉及到一个叫`Unsafe`的类，为了弄清楚底层的原理，特意学习了下`sun.misc.Unsafe`类。
 
 #### 如何获取Unsafe实例
-    <?prettify?>
+
+<?prettify?>
     private static final Unsafe unsafe = Unsafe.getUnsafe();
     
 源码里面很多像上面这样的初始化片段，如果直接copy过来放到自己的类里面用的话，发现无法实例化，会抛出一个`SecurityException`异常：
-    <?prettify?>
+
+<?prettify?>
     Caused by: java.lang.SecurityException: Unsafe
     
 原因是`getUnsafe`方法的源码只接受受信任的代码调用这个方法，代码如下：
@@ -37,7 +39,8 @@ tags: [native]
 #### Singleton模式的破解
 
 `Unsafe`类有个方法可以实现初始化类：`allocateInstance`方法，下面给出代码测试：
-    <?prettify?>
+
+<?prettify?>
     public class ClassTemplate {
       private int a;
 
@@ -71,10 +74,11 @@ tags: [native]
 用`allocateInstance`初始化的类，*看起来没有执行构造器里面的初始化代码*
 
 我们修改下代码，在默认构造器上加一个入参，修改以后的代码片段如下：
-    <?prettify?>
+
+<?prettify?>
     public ClassTemplate(int temp) {
         this.a = 10;
-      }
+    }
     
     // method 1
     ClassTemplate ct1 = new ClassTemplate(1);
@@ -82,13 +86,15 @@ tags: [native]
 修改以后再次运行代码，这次报异常`java.lang.InstantiationException`，原因是通过反射初始化类的前提是要有一个不带参数的默认构造器。
 
 再次修改代码，把下面这段注释掉：
-    <?prettify?>
+
+<?prettify?>
     // method 2
     //ClassTemplate ct2 = ClassTemplate.class.newInstance();
     //System.out.println(ct2);
     
 保存运行代码，这次没有报错，运行结果如下：
-    <?prettify?>
+
+<?prettify?>
     [10]
     [0]
     
